@@ -1,0 +1,12 @@
+{
+  "name": "geoai-spatial-workspace",
+  "version": "0.18.0",
+  "private": true,
+  "description": "经纬空间工作台 — 多年度遥感、可复核成果包与业务协同一张图",
+  "scripts": {
+    "dev": "python3 scripts/serve.py",
+    "start": "python3 scripts/serve.py",
+    "check": "node scripts/check.cjs"
+  },
+  "type": "module"
+}

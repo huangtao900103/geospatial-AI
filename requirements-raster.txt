@@ -1,0 +1,5 @@
+# Raster runtime for Sentinel-2 windows and city-wide WorldCover accounting.
+# Python 3.9 compatible versions, verified in this workspace.
+rasterio==1.4.3
+numpy>=1.24,<3
+Pillow==11.3.0

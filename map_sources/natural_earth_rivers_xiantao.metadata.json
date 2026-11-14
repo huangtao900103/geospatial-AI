@@ -1,0 +1,25 @@
+{
+  "source_type": "public",
+  "provider": "Natural Earth",
+  "source_url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_rivers_lake_centerlines.geojson",
+  "provider_url": "https://www.naturalearthdata.com/",
+  "license": "Public domain",
+  "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+  "attribution": "Made with Natural Earth · Public domain · 1:10,000,000",
+  "crs": "OGC:CRS84 / EPSG:4326 longitude,latitude",
+  "scale": "1:10,000,000",
+  "fetched_at": "2026-11-12T16:02:29.782+00:00",
+  "source_bytes": 7307743,
+  "source_sha256": "bb854a900ecbd3b408df46d5e16e3e0f974ba55993f9d8b5c26e855273c0905a",
+  "source_feature_count": 1455,
+  "feature_count": 2,
+  "clip_bbox": [
+    112.8,
+    29.8,
+    114.1,
+    30.85
+  ],
+  "derivation": "Liang-Barsky segment clipping, no invented geometry; no re-projection needed for source CRS84",
+  "limitations": "概化宏观水系，非乡村沟渠、农田边界或权威水利图层；不代表当前河道变化。",
+  "snapshot_sha256": "ea1f4d98fae0949477cbc5185fae6cad5f39bc9a6d44567c1b055f43ce8646be"
+}

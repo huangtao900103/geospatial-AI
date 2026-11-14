@@ -1,0 +1,25 @@
+/** Isolated UI contract checks; all data here are explicit unit fixtures, never runtime datasets. */
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {MapCopilot} from '../../dist/map-copilot.js';
+import {MapWorkspace} from '../../dist/map-workspace.js';
+const passed=[];
+const test=(name,fn)=>{fn();passed.push(name)};
+const ui=Object.create(MapCopilot.prototype);
+Object.assign(ui,{applications:[],applicationDrafts:{},area:{name:'Unit AOI',bbox:[114.2,30.5,114.21,30.51]},userDatasets:[],businessScenarios:null,busy:false,applicationError:'',observationBindings:new Map()});
+const fields=[{key:'algorithm_id',type:'select',label:'分析算法',options:[{value:'temporal_median',label:'中位数'},{value:'temporal_mean',label:'均值'},{value:'temporal_trend',label:'趋势'}]},{key:'index_id',type:'select',label:'指数',options:[{value:'ndvi',label:'NDVI'},{value:'ndre',label:'NDRE'}]},{key:'source_id',type:'select',label:'影像来源',options:[{value:'auto',label:'自动'},{value:'pc_sentinel2_l2a',label:'S2'},{value:'pc_landsat_c2_l2',label:'Landsat'}]},{key:'scene_limit',type:'number',label:'场景上限',min:2,max:6},{key:'cloud',type:'number',label:'景云量'}];
+const temporal={id:'temporal_analysis',name:'时段影像分析',featured:true,ready:true,scope:'selected_aoi',form:{requires_bbox:true,period_mode:'single',fields},method:{processing_family:'temporal'},defaults:{context:{period:{start:'2025-10-01',end:'2025-11-30'}},parameters:{algorithm_id:'temporal_median',source_id:'auto',index_id:'ndvi',scene_limit:4,cloud:40}},outputs:['GeoTIFF','逐景统计'],limitations:[]};
+ui.applications=[temporal];ui.applicationId=temporal.id;
+test('collection form keeps algorithm and dates explicit while optional settings show summary',()=>{const html=ui.applicationForm(temporal);assert.match(html,/data-app-parameter="algorithm_id"/);assert.match(html,/data-app-date="start"/);assert.match(html,/最多4景/);assert.match(html,/景云量上限40%/);assert.match(html,/不代表逐日完整覆盖/)});
+test('trend blocks fewer than three observations rather than inventing a slope',()=>{const draft=ui.applicationDraft(temporal);draft.parameters.algorithm_id='temporal_trend';draft.parameters.scene_limit=2;const availability=ui.sourceAvailability(temporal,draft);assert.equal(availability.blocked,true);assert.match(availability.message,/至少需要3个/);draft.parameters.scene_limit=4});
+test('NDRE still blocks Landsat for temporal processing',()=>{const draft=ui.applicationDraft(temporal);draft.parameters.index_id='ndre';draft.parameters.source_id='pc_landsat_c2_l2';assert.equal(ui.sourceAvailability(temporal,draft).blocked,true)});
+const q={id:'unit-question',binding:{type:'raster_processing',task_id:'unit-task'},answer:{result_ref:{type:'raster_processing',task_id:'unit-task',image_kind:'temporal_trend'}}};
+const job={result:{summary:{algorithm_id:'temporal_trend',scene_count:4,valid_pixel_count:8,native_pixel_count:9,valid_ratio:8/9,min_observations:3,slope_unit:'index/day',actual_dates:['2025-10-01','2025-10-09','2025-10-17','2025-10-25']},provenance:{index_id:'ndvi'},time_series:[{date:'2025-10-01',mean_value:0,valid_ratio:0},{date:'2025-10-09',mean_value:null,valid_ratio:null}],report:{limitations:['Unit fixture only']}}};
+ui.executionFor=()=>job;
+test('processing quality uses declared pixel count, date and daily slope units',()=>{const html=ui.processingQualityPanel(q);assert.match(html,/有效结果像元/);assert.match(html,/8个/);assert.match(html,/指数\/天/);assert.match(html,/2025-10-25/)});
+test('series preserves a measured zero while unknown remains unknown',()=>{const html=ui.processingSeries(q);assert.match(html,/0\.0000/);assert.match(html,/0\.0%/);assert.match(html,/—/)});
+test('processed results receive a task-bound full bundle',()=>{const files=ui.downloadsFor({...q,status:'answered'});assert.equal(files[0].url,'/api/results/raster_processing/unit-task/bundle.zip')});
+test('map rejects synthetic data before attempting to construct a Leaflet layer',()=>{assert.throws(()=>MapWorkspace.prototype.makeOverlay.call({},'unit',{type:'FeatureCollection',features:[]},{source_type:'synthetic'}),/演示图层已移除/)});
+test('result count excludes demonstration runs and artificial pixel tasks',()=>{const workspace=Object.create(MapWorkspace.prototype);workspace.context={runs:[{result:{}}],analyses:[{provenance:{source_type:'synthetic'}},{provenance:{source_type:'user'}}],productionTasks:[{plan:{mode:'sample_pixels'},result:{}},{plan:{mode:'sentinel_cog'},result:{}}],rasterProcessingTasks:[{result:{}}]};assert.equal(workspace.resultCount(),3)});
+const proof={notice:'Isolated UI fixtures only; no platform records or private configuration written',checks_passed:passed.length,checks:passed};
+fs.writeFileSync('output/v18-ui/contract-checks.json',JSON.stringify(proof,null,2));console.log(JSON.stringify(proof));

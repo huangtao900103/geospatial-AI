@@ -1,0 +1,24 @@
+{
+  "source": "GeoNames cities15000 country CN subset + Hubei ADM1 official feature",
+  "source_url": "https://download.geonames.org/export/dump/cities15000.zip",
+  "source_archive_sha256": "50ef2f0cf7a1dd6d67123aaa6cdd45a8cf48ff5d23b3677e896f009ccce768d7",
+  "source_archive_last_modified": "Fri, 13 Nov 2026 02:44:25 GMT",
+  "fetched_at": "2026-11-13T07:15:18+00:00",
+  "filter": "country_code == CN",
+  "count": 2124,
+  "hubei_city_points": 56,
+  "coverage": "中国2123个城镇参考点（含湖北56个）及湖北省参考点；不含全部区县、村镇或兴趣点",
+  "crs": "EPSG:4326",
+  "license": "CC BY 4.0",
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "terms_url": "https://www.geonames.org/export/",
+  "format_url": "https://download.geonames.org/export/dump/readme.txt",
+  "attribution": "GeoNames — https://www.geonames.org/ — CC BY 4.0",
+  "limitations": [
+    "These are navigation reference points, not administrative boundary polygons, legal extents or analysis masks.",
+    "GeoNames is supplied as-is without accuracy, timeliness or completeness warranty.",
+    "Selected Hubei Chinese display aliases are local transliterations/administrative-seat labels; coordinates and IDs remain original source records."
+  ],
+  "supplemental_source_url": "https://www.geonames.org/1806949/hubei.html",
+  "snapshot_sha256": "edd087c109c88771156a74baaca876661fa3c7d5aa15fdd51cc16f55695933b7"
+}

@@ -1,0 +1,22 @@
+// Isolated controller checks. No browser, HTTP, database or satellite reads occur.
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {ProductionWorkspace} from '../../dist/production-workspace.js';
+const storage=new Map([['geoai-v5-mode',JSON.stringify('sample_pixels')]]);
+globalThis.localStorage={getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)};
+globalThis.document={createElement:()=>({className:'',innerHTML:'',classList:{toggle(){}},addEventListener(){},querySelector(){return null},isConnected:false})};
+const calls=[];const nativeMode={id:'sentinel_cog',available:true};
+const w=new ProductionWorkspace({api:async(path,args)=>{calls.push({path,args});return {id:'production_controller_check',status:'queued',plan:args.body,result:null,nodes:[],created_at:'2026-11-14'}},onChange(){},toast(){},showDialog(){}});
+w.startPolling=()=>{};
+assert.equal(w.draft.mode,'sentinel_cog');assert.equal(JSON.parse(storage.get('geoai-v5-mode')),'sentinel_cog');
+w.capabilities={modes:[{id:'sample_pixels',available:true},nativeMode],indices:[]};
+assert(!w.modeOptions().includes('sample_pixels'));assert(!w.modeOptions().includes('人工'));assert(w.modeOptions().includes('Sentinel-2 / Landsat'));
+w.draft.requirement='分析所选范围2025年11月NDVI';w.draft.mode='sample_pixels';w.inheritedOverrides={bbox:[114.2,30.5,114.21,30.51],mode:'sample_pixels',sampling:'representative'};
+await w.submit();assert.equal(calls.length,1);assert.equal(calls[0].args.body.mode,'sentinel_cog');assert.equal(calls[0].args.body.sampling,'native');
+const historical={id:'real_representative_history',status:'succeeded',plan:{mode:'sentinel_cog',sampling:'representative',requirement:'分析所选范围2025年11月NDVI',aoi:{bbox:[114.2,30.5,114.21,30.51]},goal:'ndvi'},result:{provenance:{source_type:'public_satellite_pixels'},summary:{},artifacts:[]}};
+w.selectTask(historical,{render:false});assert.equal(w.draft.mode,'sentinel_cog');assert(w.history().includes('历史公开影像代表网格'));
+await w.submit();assert.equal(calls[1].args.body.sampling,'native');
+assert.throws(()=>w.selectTask({id:'removed',plan:{mode:'sample_pixels'}},{render:false}),/来源已移除/);
+const before=calls.length;await w.act('advanced-workflow',{});assert.equal(calls.length,before);assert(!w.element.innerHTML.includes('advanced-workflow'));assert(!w.element.innerHTML.includes('pw-examples'));
+const result={isolated_controller_checks:true,network_calls:false,stored_legacy_mode_reset:true,sample_mode_not_displayed:true,new_submissions_native_even_with_legacy_overrides:true,real_representative_history_readable:true,rerun_upgrades_to_native:true,artificial_task_rejected:true,legacy_workflow_action_disabled:true};
+fs.mkdirSync('output/v18-cleanup',{recursive:true});fs.writeFileSync('output/v18-cleanup/production-native-ui-proof.json',JSON.stringify(result,null,2));console.log('Native-only production controller checks passed. No HTTP/DB writes.');
