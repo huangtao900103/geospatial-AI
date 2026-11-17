@@ -1,0 +1,24 @@
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+import { useWorkspaceStore } from '../stores/workspace'
+import type { WorkspaceRuntime } from '../adapters/runtime'
+import { api } from '../services/api'
+import type { Dataset, DataSource } from '../types/api'
+import ResourceNotice from './ResourceNotice.vue'
+import SourceAdvanced from './SourceAdvanced.vue'
+import SourceCard from './SourceCard.vue'
+const props=defineProps<{runtime:WorkspaceRuntime}>(),store=useWorkspaceStore(),query=ref(''),filter=ref('all')
+const userData=computed(()=>store.datasets.filter(d=>d.source_type==='user'))
+const tabs=[{id:'uploads',name:'我的数据'},{id:'catalog',name:'数据来源'},{id:'library',name:'影像资源'},{id:'search',name:'查找影像'}] as const
+function matches(s:DataSource){return [s.name,s.provider,s.source_type,...(s.semantics||[]),...(s.coverage?.temporal?.available_years||[]),...(s.coverage?.temporal?.connected_years||[])].join(' ').toLocaleLowerCase().includes(query.value.trim().toLocaleLowerCase())}
+const filtered=computed(()=>store.sources.filter(s=>matches(s)&&(filter.value==='all'||filter.value==='shared'&&s.platform_shared||filter.value==='ready'&&s.stages.analysis_ready||filter.value==='pending'&&!s.stages.analysis_ready&&!s.stages.catalog_searchable)))
+async function detail(id:string){try{await props.runtime.showSourceDetail(id)}catch(e){store.toast(e instanceof Error?e.message:'来源详情暂未读取')}}
+async function settings(){try{await props.runtime.action('tianditu-config')}catch(e){store.toast(e instanceof Error?e.message:'配置暂未读取')}}
+async function download(id:string){try{const data=await api<Dataset>('/datasets/'+encodeURIComponent(id));if(!data.geojson)throw Error('该图层没有可下载几何');const url=URL.createObjectURL(new Blob([JSON.stringify(data.geojson,null,2)],{type:'application/geo+json'})),link=document.createElement('a');link.href=url;link.download=(data.name||id).replace(/[\\/:*?"<>|]/g,'_').slice(0,80)+'.geojson';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}catch(e){store.toast(e instanceof Error?e.message:'下载失败')}}
+async function show(id:string){try{await props.runtime.showDataset(id)}catch(e){store.toast(e instanceof Error?e.message:'图层上图未完成')}}
+</script>
+<template><section class="vue-data-workspace"><div class="sw-heading"><div><h1>数据</h1><p>上传业务图层，查找影像与可调用的数据来源。</p></div><div class="vue-data-actions"><button class="btn primary" @click="store.overlay='upload'">上传数据</button><button class="btn" @click="settings">地图服务设置</button></div></div><div class="sw-tabs" role="tablist" aria-label="数据工作台"><button v-for="item in tabs" :key="item.id" role="tab" :aria-selected="store.dataTab===item.id" :class="{active:store.dataTab===item.id}" @click="store.setDataTab(item.id)">{{item.name}}<span v-if="item.id==='uploads'">{{userData.length}}</span><span v-else-if="item.id==='catalog'">{{store.sources.length}}</span></button></div>
+ <section v-if="store.dataTab==='uploads'"><div class="vue-data-toolbar"><div><h2>我的数据</h2><p>WGS84 GeoJSON点、线与面；上传后可直接上图。</p></div><button class="btn" :disabled="store.resources.datasets.status==='loading'" @click="store.refreshDatasets">刷新列表</button></div><ResourceNotice resource="datasets"/><div v-if="userData.length" class="vue-dataset-grid"><article v-for="d in userData" :key="d.id" class="vue-source-card"><h3>{{d.name || d.id}}</h3><p>用户上传 · {{d.feature_count ?? '数量未提供'}}个要素</p><details class="vue-layer-metadata"><summary>图层信息</summary><p>图层编号：{{d.id}}</p></details><button class="btn primary" @click="show(d.id)">地图查看</button><button class="btn" @click="download(d.id)">下载GeoJSON</button></article></div><div v-else-if="store.resources.datasets.status==='ready'" class="vue-data-empty"><h3>还没有上传图层</h3><p>支持GeoJSON，最多500要素、5000坐标点、2MiB。</p><button class="btn primary" @click="store.overlay='upload'">上传业务数据</button></div></section>
+ <section v-else-if="store.dataTab==='catalog'"><div class="vue-data-toolbar"><div><h2>数据来源</h2><p>目录可检索、像元可读取和已有分析适配分别标识，实际使用以任务记录为准。</p></div><button class="btn" :disabled="store.resources.sources.status==='loading'" @click="store.refreshResource('sources')">刷新来源</button></div><ResourceNotice resource="sources"/><div class="vue-source-filters"><label class="sr-only" for="sw-catalog-search">查找数据来源</label><input id="sw-catalog-search" v-model="query" type="search" placeholder="搜索数据源、年份或用途"><select v-model="filter" aria-label="来源类型筛选"><option value="all">全部来源</option><option value="shared">文章收录的共用来源</option><option value="ready">具备分析适配</option><option value="pending">待接入来源</option></select></div><p class="source-result-count" role="status">{{filtered.length}}项来源{{query?' · 已筛选':''}}</p><div class="vue-source-grid"><SourceCard v-for="s in filtered" :key="s.id" :source="s" @detail="detail"/></div><p v-if="!filtered.length && store.resources.sources.status==='ready'" class="vue-data-empty">没有匹配来源，请调整搜索或筛选条件。</p></section>
+ <SourceAdvanced v-else :runtime="runtime" :tab="store.dataTab"/>
+ </section></template>

@@ -1,9 +1,8 @@
 /** Isolated UI contract checks: no requests, runtime records or source downloads. */
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {MapCopilot} from '../../dist/map-copilot.js';
-const sourceCode=fs.readFileSync(new URL('../../dist/sources-workspace.js',import.meta.url),'utf8').replace("'/observation-library.js?v=20261115-v18'",JSON.stringify(new URL('../../dist/observation-library.js',import.meta.url).href));
-const {SourcesWorkspace}=await import('data:text/javascript;base64,'+Buffer.from(sourceCode).toString('base64'));
+import {MapCopilot} from '../../frontend/src/workspaces/map-copilot.js';
+const {SourcesWorkspace}=await import('../../frontend/src/workspaces/sources-workspace.js');
 const ui=Object.assign(Object.create(SourcesWorkspace.prototype),{plans:[],searches:[],sources:[],query:'',filter:'all'}),cases=[];
 const item={id:'draft_fixture',name:'Isolated crop fixture',source_type:'landcover_raster',platform_shared:true,coverage:{temporal:{available_years:[2023],connected_years:[]},spatial:{scope_note:'隔离测试范围'}},stages:{connection_status:'registered_not_connected',pixel_applicable:true,analysis_ready:false,pixel_readable:false,catalog_searchable:false},usage_policy:{mode:'on_demand'},integration:{blocker:'隔离测试：尚无读取适配'},provenance:{article_url:'https://example.test/article'},license:{name:'未核实',verified:false}};
 ui.sources=[item];assert.equal(ui.category(item),'product');assert.equal(ui.filtered().length,1);ui.filter='pending';assert.equal(ui.filtered().length,1);cases.push('Shared registry items remain products and appear in the pending filter despite legacy draft IDs');

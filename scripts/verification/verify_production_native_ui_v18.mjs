@@ -1,7 +1,7 @@
 // Isolated controller checks. No browser, HTTP, database or satellite reads occur.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {ProductionWorkspace} from '../../dist/production-workspace.js';
+import {ProductionWorkspace} from '../../frontend/src/workspaces/production-workspace.js';
 const storage=new Map([['geoai-v5-mode',JSON.stringify('sample_pixels')]]);
 globalThis.localStorage={getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)};
 globalThis.document={createElement:()=>({className:'',innerHTML:'',classList:{toggle(){}},addEventListener(){},querySelector(){return null},isConnected:false})};

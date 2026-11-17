@@ -1,8 +1,8 @@
 /** Isolated UI contract checks; all data here are explicit unit fixtures, never runtime datasets. */
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {MapCopilot} from '../../dist/map-copilot.js';
-import {MapWorkspace} from '../../dist/map-workspace.js';
+import {MapCopilot} from '../../frontend/src/workspaces/map-copilot.js';
+import {MapWorkspace} from '../../frontend/src/workspaces/map-workspace.js';
 const passed=[];
 const test=(name,fn)=>{fn();passed.push(name)};
 const ui=Object.create(MapCopilot.prototype);

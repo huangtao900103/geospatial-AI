@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
-import {sceneResultView} from '../../dist/scene-workflow.js';
-import {sceneCategories,sceneFeatureColor,mapResultContext} from '../../dist/map-workspace.js';
-import {comparableSeries,renderCommonSeries} from '../../dist/series-reading.js';
+import {sceneResultView} from '../../frontend/src/workspaces/scene-workflow.js';
+import {sceneCategories,sceneFeatureColor,mapResultContext} from '../../frontend/src/workspaces/map-workspace.js';
+import {comparableSeries,renderCommonSeries} from '../../frontend/src/workspaces/series-reading.js';
 const passed=[];
 const project={dataset_id:'data_a',summary:{feature_count:2,input_feature_count:3,polygon_feature_count:2,area_sum_ha:1.5,options:{group_by:'状态',query:'在建'},measure_field:'投资',measure_sum:30,measure_unit:'万元'}};
 const before=JSON.stringify(project),draft={dataset_id:'data_a',group_by:'状态',query:'在建'};

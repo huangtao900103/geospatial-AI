@@ -16,7 +16,8 @@ geospatial-AI/
 │   ├── analysis/             # 原生栅格、指数、年度分类与影像处理
 │   ├── agriculture/          # 农业分析、区域成果、作物样本与时序
 │   └── workflows/            # 专题、问答、受控执行与行业台账流程
-├── dist/                     # 直接提供给浏览器的静态HTML/CSS/JS和vendor资源
+├── frontend/                 # Vue3/TypeScript组件、Pinia状态、服务与专业模块适配
+├── dist/                     # Vite构建结果，Git忽略
 ├── data_sources/             # 可版本化的来源登记与公开参考元数据
 ├── map_sources/              # 可版本化的地图和地点参考资料
 ├── scripts/
@@ -32,7 +33,7 @@ geospatial-AI/
 └── output/                   # 生产中间数据和验收证据，Git忽略
 ```
 
-`dist/`是当前前端源码与运行资源目录，不是另一个构建工具生成的待提交产物。保持文件名和浏览器资源路径可减少地图、动态模块及既有验证脚本的迁移风险。`backend/paths.py`统一定位项目根目录，运行数据位置仍由数据库路径决定，不依赖当前工作目录推测资源位置。
+前端源码位于`frontend/`，Vue管理应用外壳、导航、上传、弹窗、数据目录与任务历史，Pinia管理共享状态，API服务执行运行时响应校验并处理错误、超时及取消。资源独立刷新，保留失败前的内容和时间；代次保护防止迟到响应覆盖新状态。Leaflet和已验证的专业面板经`adapters/runtime.ts`接入组件生命周期；专业面板内部仍有JavaScript模板，尚未全部重写为Vue单文件组件。`npm run build`输出`dist/`，Python只提供构建文件及API。开发时Vite的`/api`代理保持同源请求校验。
 
 ## 请求与执行链
 
@@ -72,8 +73,12 @@ GlobalRice20的2024年产品具备受控COG窗口读取与年度水稻参考面�
 | --- | --- | --- |
 | 新数据来源或资产类型 | `backend/catalog/`、`backend/integrations/`、来源登记 | 固定上游、认证、覆盖、定标/类别、许可与实际读取证据 |
 | 新栅格或农业算法 | `backend/analysis/`、`backend/agriculture/` | 原生输入、质量、单位、未知值、空间支持与版本输出 |
-| 新业务专题 | `backend/workflows/`、`dist/`场景和表单模块 | 参数校验、真实执行工具、结果恢复、地图与下载 |
+| 新业务专题 | `backend/workflows/`、`frontend/`场景和表单模块 | 参数校验、真实执行工具、结果恢复、地图与下载 |
 | 新HTTP能力 | `backend/server.py`及对应领域服务 | 请求字段、同源限制、错误响应与隔离HTTP测试 |
-| 界面交互 | `dist/` | 状态恢复、真实空缺、选区同步、版本固定与响应式阅读 |
+| 界面交互 | `frontend/` | 状态恢复、真实空缺、选区同步、版本固定与响应式阅读 |
 
 当前产品说明见[产品边界](PRODUCT.md)，接口见[API参考](API.md)，使用与专项指南见[文档导航](../README.md)。
+
+## 自动化验证
+
+`npm run check`执行语法、构建、隔离后端、状态/API单元与专业模块契约。`npm run test:e2e`在独占端口8096启动临时工作空间，用Chromium验证上传、空间统计、来源筛选、刷新恢复、任务恢复、栅格显示与点查、下载、清除框选及移动导航。合成格网明确标识且只存在临时目录，不能作为真实遥感数据可用性或精度的证据。GitHub Actions同时运行两组检查；业务库与私有配置不参加回归。

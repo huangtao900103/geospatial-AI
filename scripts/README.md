@@ -13,6 +13,7 @@
 ## 启动
 
 ```bash
+npm ci
 npm start
 npm start -- --port 8020
 .venv/bin/python scripts/serve.py --port 8016 --db data/workspace.sqlite3
@@ -23,18 +24,23 @@ npm start -- --port 8020
 ## 日常检查
 
 ```bash
+npm run build
 npm run check:syntax
 npm run check:backend
 npm run check:ui
 npm run check
+npx playwright install chromium
+npm run test:e2e
 ```
 
-- `check:syntax` 检查手写前端、脚本和Python语法，排除第三方 `dist/vendor/`。
+- `check:syntax` 检查前端专业模块、脚本和Python语法，排除第三方vendor资源。
 - `check:backend` 使用 `unittest discover -s tests`，数据与HTTP服务由测试在临时目录内创建。
-- `check:ui` 执行 `verification/` 下全部 `.mjs` 契约检查；默认不连接运行中的工作空间。场景工具注册核验从临时Workspace读取实际应用目录。设置 `SCENE_TEST_URL` 可显式切换该项为只读HTTP注册核验。
+- `check:ui` 先类型检查及构建Vue前端，运行TypeScript状态/API测试，再执行 `verification/` 下全部 `.mjs` 契约检查；默认不连接运行中的工作空间。场景工具注册核验从临时Workspace读取实际应用目录。设置 `SCENE_TEST_URL` 可显式切换该项为只读HTTP注册核验。
 - `check` 默认依次运行全部三组；也可直接组合，例如 `node scripts/check.cjs --syntax --ui`。
 
-这些检查验证代码与契约，不等同于真实浏览器、外部服务或像元读取验收。检查证据写到忽略的 `output/` 目录。
+`test:e2e`构建后通过`verification/serve_browser_tests.py`在临时目录创建独立工作空间，固定使用8096端口、不复用已有进程。浏览器验证真实上传、算法、地图、像元及下载链路；栅格输入为明确标注的合成测试文件，结束时清理。不读取生产库、服务密钥或外部卫星文件。
+
+默认`check`验证代码与契约；浏览器回归也不能代替外部服务或正式影像精度验收。检查证据写到忽略的 `output/` 目录。
 
 ## 生产与发布
 

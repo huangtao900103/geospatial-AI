@@ -6,20 +6,22 @@
 
 ## 快速启动
 
-需要 Python 3.9 或兼容环境；通过 npm 启动和检查时需要 Node.js/npm。在项目根目录执行：
+需要 Python 3.9 或兼容环境，以及 Node.js 22.12及以上版本和npm。在项目根目录执行：
 
 ```sh
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements-raster.txt
+npm ci
 npm start
 ```
 
-以上为 macOS/Linux 命令。`scripts/serve.py` 会优先使用项目 `.venv`，服务只绑定 `127.0.0.1`。前端是手写 HTML、CSS 和原生 JavaScript，直接从 `dist/` 提供服务，无需打包或执行 `npm install`。
+以上为 macOS/Linux 命令。`scripts/serve.py` 会优先使用项目 `.venv`，服务只绑定 `127.0.0.1`。前端使用 **Vue 3 + TypeScript + Pinia + Vite**。`npm start`先类型检查和构建，再启动Python服务；`dist/`是构建输出，不提交Git。依赖由`package-lock.json`固定，用`npm ci`安装。
 
 其他启动方式：
 
 ```sh
 npm start -- --port 8020
+npm run build  # 直接启动Python前先构建前端
 .venv/bin/python server.py --port 8016 --db data/workspace.sqlite3
 .venv/bin/python -m backend --port 8016 --db data/workspace.sqlite3
 ```
@@ -48,7 +50,15 @@ geospatial-AI/
 │   ├── analysis/              # 原生栅格、光谱指数、分类和时序处理
 │   ├── agriculture/           # 农业分析、作物产品、区域成果与样本研究
 │   └── workflows/             # 专题、问答、执行任务、台账和答案组装
-├── dist/                      # 直接运行的前端源文件及 Leaflet 本地资源
+├── frontend/                  # Vue + TypeScript前端源码与Vite配置
+│   ├── src/components/        # Vue页面、上传、弹窗与功能组件
+│   ├── src/stores/            # Pinia共享状态
+│   ├── src/services/          # HTTP请求、运行时响应校验与导航
+│   ├── src/adapters/          # 地图和专业模块的生命周期及类型边界
+│   ├── src/workspaces/        # 保留的Leaflet与专业业务模块
+│   ├── e2e/                  # 隔离工作空间的真实浏览器回归
+│   └── public/vendor/         # 本地Leaflet资源及许可
+├── dist/                      # Vite生成的部署文件（Git忽略）
 ├── data_sources/              # 版本化数据来源清单、公开参考市界
 ├── map_sources/               # 版本化地名索引与公开参考水系
 ├── scripts/
@@ -68,7 +78,7 @@ geospatial-AI/
 └── output/                    # 日志、诊断、截图和验证证据（Git忽略）
 ```
 
-代码定位见[后端导航](backend/README.md)，工具用法见[脚本导航](scripts/README.md)，测试职责见[测试导航](tests/README.md)。`dist/` 是直接维护的前端代码，不是可以删除后重新构建的临时产物。
+代码定位见[后端导航](backend/README.md)，工具用法见[脚本导航](scripts/README.md)，测试职责见[测试导航](tests/README.md)。前端开发说明见[前端导航](frontend/README.md)。请修改`frontend/`源码；`dist/`可通过`npm run build`重建。
 
 ## 使用方式与当前能力
 
@@ -89,9 +99,22 @@ geospatial-AI/
 | 行业台账 | 农业、林业、水利、交通共22项台账场景，可绑定用户数据、筛选分组、统计、上图和下载；场景存在不代表监管系统已接入。 |
 | 来源与执行 | 共用来源目录、多源STAC发现、观测/资产版本入库、算法契约匹配、受控问答和版本固定下载。目录命中不等于已读取像元或完成分析。 |
 
-当前有18项分析专题，由 `GET /api/applications` 返回；台账场景定义在 `dist/scene-catalog.js`，绑定和历史运行通过 `GET /api/scene-workflows` 读取。光谱指数共12项：NDVI、NDWI、MNDWI、NDMI、NDBI、NBR、EVI2、SAVI、MSAVI2、GNDVI、NDRE、BSI；Landsat 8/9不支持NDRE。
+当前有18项分析专题，由 `GET /api/applications` 返回；台账场景定义在 `frontend/src/workspaces/scene-catalog.js`，绑定和历史运行通过 `GET /api/scene-workflows` 读取。光谱指数共12项：NDVI、NDWI、MNDWI、NDMI、NDBI、NBR、EVI2、SAVI、MSAVI2、GNDVI、NDRE、BSI；Landsat 8/9不支持NDRE。
 
 交互光谱选区单边不超过 `0.05°`，最多 `1,048,576` 个参考格网像元；交互时序最多183天、6个独立观测日期，保持同一传感器系列。GlobalRice20行政参考范围最多2000万原生像元，超限需使用子区。具体限制以专题表单和接口契约为准。
+
+## 前端开发
+
+```sh
+# 终端一：Python API（8016）
+npm run dev:server
+# 终端二：Vue开发服务器（5173，代理/api到8016）
+npm run dev
+```
+
+生产入口仍是8016。页面入口、导航、共享状态、上传、对话框、我的数据、来源目录、任务与成果、矢量分析和系统集成采用Vue组件与TypeScript。已验证的Leaflet、影像检索及复杂遥感表单保留JavaScript模块，由组件适配器管理挂载、事件与轮询；新增通用界面使用Vue组件。
+
+资源列表独立刷新，失败或返回格式异常时保留已有内容、显示上次读取时间并提供单项重试。真实的空列表与读取失败分别处理；请求次序保护避免旧列表覆盖新上传的数据。API边界执行运行时校验，不将TypeScript声明视为服务响应已经正确。
 
 ## 数据来源与按需调用
 
@@ -114,7 +137,7 @@ geospatial-AI/
 ## 配置、数据与部署边界
 
 - **工作空间**：默认数据库是 `data/workspace.sqlite3`；`--db` 可选择另一工作空间。成果和服务配置按该数据库所在目录组织，不随代码包移动。
-- **地图配置**：通过“数据 → 数据设置 → 地图服务设置”管理天地图服务端Key。配置保存在工作空间的 `integrations/tianditu.json`，不把Key写入README、Git或浏览器链接。详见[天地图配置](docs/guides/TIANDITU_SETUP.md)。
+- **地图配置**：通过“数据 → 地图服务设置”管理天地图服务端Key。配置保存在工作空间的 `integrations/tianditu.json`，不把Key写入README、Git或浏览器链接。详见[天地图配置](docs/guides/TIANDITU_SETUP.md)。
 - **模型桥接**：当前提供本机Codex CLI测试接入，工作空间的 `integrations/model.json` 控制启用与超时等设置，复用本机登录状态。它生成受控计划，服务仍校验工具、来源、范围和版本，不执行任意代码或Shell。
 - **备份与复用**：迁移本机成果时同时保留数据库、成果文件、来源说明和内容指纹；恢复业务资料与恢复私有配置分别按授权处理。只复制代码不会复制本机结果。
 - **部署范围**：当前为本机单工作空间服务，尚不具备公网生产所需的组织认证、多租户隔离或分布式作业调度。
@@ -125,8 +148,12 @@ geospatial-AI/
 npm run check             # 前端语法、后端隔离测试、前端隔离契约
 npm run check:syntax      # 语法与编译检查
 npm run check:backend     # 后端测试
-npm run check:ui          # 前端隔离契约
+npm run check:ui          # 构建、类型检查、状态/API测试及专业模块契约
+npx playwright install chromium  # 浏览器回归首次安装
+npm run test:e2e          # 构建并运行隔离浏览器回归，固定端口8096
 ```
+
+浏览器回归在系统临时目录创建数据库与明确标注的合成格网，实际运行本机算法、上图、像元点查和文件下载；不使用本机密钥，也不验证外部影像服务。8096被占用时测试直接失败，不复用已有服务。GitHub Actions已配置代码检查与浏览器回归；运行证据在`output/playwright/`。
 
 默认检查不生产正式地市数据，不清理工作空间。需要联网或已有正式成果的专项验证应按[脚本说明](scripts/README.md)单独调用。生产工具可先查看参数：
 

@@ -4,12 +4,33 @@
   "private": true,
   "description": "时空智能工作台 — 多年度遥感、可复核成果包与业务协同一张图",
   "scripts": {
-    "dev": "python3 scripts/serve.py",
-    "start": "python3 scripts/serve.py",
+    "dev": "vite --config frontend/vite.config.ts",
+    "start": "npm run build && python3 scripts/serve.py",
     "check": "node scripts/check.cjs",
     "check:syntax": "node scripts/check.cjs --syntax",
     "check:backend": "node scripts/check.cjs --backend",
-    "check:ui": "node scripts/check.cjs --ui"
+    "check:ui": "node scripts/check.cjs --ui",
+    "dev:server": "python3 scripts/serve.py",
+    "build": "vue-tsc -p frontend/tsconfig.json --noEmit && vite build --config frontend/vite.config.ts",
+    "typecheck": "vue-tsc -p frontend/tsconfig.json --noEmit",
+    "test:frontend": "vitest run --config frontend/vite.config.ts",
+    "test:e2e": "npm run build && playwright test --config frontend/playwright.config.ts"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "pinia": "^4.1.0",
+    "vue": "^3.5.45"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "@types/node": "^26.6.6",
+    "@vitejs/plugin-vue": "^6.0.11",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0",
+    "vue-tsc": "^3.3.14"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
 }

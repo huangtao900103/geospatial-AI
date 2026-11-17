@@ -1,0 +1,10 @@
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import App from './App.vue'
+import './styles/style.css'
+import './styles/map-reading.css'
+import './styles/workspace-polish.css'
+import './styles/atlas-tech.css'
+import './styles/agri-research.css'
+import './styles/vue-workspace.css'
+createApp(App).use(createPinia()).mount('#app')

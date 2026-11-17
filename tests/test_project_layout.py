@@ -21,7 +21,7 @@ class ProjectLayoutTest(unittest.TestCase):
         self.assertEqual(ROOT, PROJECT_ROOT)
         self.assertEqual(SOURCES, PROJECT_ROOT / 'data_sources')
         self.assertEqual(SOURCE_DIR, PROJECT_ROOT / 'map_sources')
-        for path in (AGRICULTURE_REFERENCE_MANIFEST, PLACE_FILE, ROOT / 'dist/index.html'):
+        for path in (AGRICULTURE_REFERENCE_MANIFEST, PLACE_FILE, ROOT / 'frontend/index.html'):
             self.assertTrue(path.is_file(), str(path))
 
     def test_every_backend_module_can_be_imported_from_the_package(self):

@@ -20,3 +20,6 @@ node_modules/
 *.db
 *.pem
 *.key
+
+# Vite build artifacts; source and vendored map assets live in frontend/
+dist/

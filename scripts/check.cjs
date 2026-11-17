@@ -22,13 +22,15 @@ function run(label,command,parameters){
  if(result.status!==0)process.exit(result.status??1);
 }
 if(groups.has('--syntax')){
- const modules=[...files(path.join(root,'dist'),new Set(['.js'])),...files(path.join(root,'scripts'),new Set(['.js','.mjs','.cjs']))];
+ const modules=[...files(path.join(root,'frontend','src'),new Set(['.js'])),...files(path.join(root,'scripts'),new Set(['.js','.mjs','.cjs']))];
  for(const module of modules)run('Syntax: '+path.relative(root,module),process.execPath,['--check',module]);
  run('Python syntax',python,['-c',
   'import ast; from pathlib import Path; paths=[Path("server.py")]+[p for folder in ("backend","scripts","tests") for p in Path(folder).rglob("*.py")]; [ast.parse(p.read_text(encoding="utf-8"),filename=str(p)) for p in paths]; print("Python syntax passed: %s files" % len(paths))']);
 }
+if(groups.has('--backend')||groups.has('--ui'))run('Vue production build','npm',['run','build']);
 if(groups.has('--backend'))run('Isolated backend tests',python,['-m','unittest','discover','-s','tests','-q']);
 if(groups.has('--ui')){
+ run('Vue state and API tests', 'npm', ['run','test:frontend']);
  for(const script of files(path.join(root,'scripts','verification'),new Set(['.mjs'])))run('UI contract: '+path.relative(root,script),process.execPath,[script]);
 }
 console.log('\nRequested checks passed. Browser and external-source integration checks run separately.');

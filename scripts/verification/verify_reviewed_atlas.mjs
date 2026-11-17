@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
-import {AgricultureAtlas,atlasPinnedURL,atlasQualityMarkup,atlasSavedSelection,atlasWorkspaceFocus} from '../../dist/agriculture-atlas.js';
-import {MapCopilot} from '../../dist/map-copilot.js';
-import {MapWorkspace} from '../../dist/map-workspace.js';
+import {AgricultureAtlas,atlasPinnedURL,atlasQualityMarkup,atlasSavedSelection,atlasWorkspaceFocus} from '../../frontend/src/workspaces/agriculture-atlas.js';
+import {MapCopilot} from '../../frontend/src/workspaces/map-copilot.js';
+import {MapWorkspace} from '../../frontend/src/workspaces/map-workspace.js';
 const cases=[],items=new Map();
 globalThis.localStorage={getItem:key=>items.get(key)??null,setItem:(key,value)=>items.set(key,String(value)),removeItem:key=>items.delete(key)};
 const hash='a'.repeat(64),changed='b'.repeat(64),clone=value=>structuredClone(value);

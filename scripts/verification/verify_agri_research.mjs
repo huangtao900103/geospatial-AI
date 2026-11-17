@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import {AgriResearch,researchSeriesResult,researchNDMIResult,renderResearchCharts,frozenResearchURL} from '../../dist/agri-research.js';
-import {MapCopilot} from '../../dist/map-copilot.js';
+import {AgriResearch,researchSeriesResult,researchNDMIResult,renderResearchCharts,frozenResearchURL} from '../../frontend/src/workspaces/agri-research.js';
+import {MapCopilot} from '../../frontend/src/workspaces/map-copilot.js';
 
 // All records below live only in memory. This check never calls the production API.
 const cases=[],hash='a'.repeat(64),productHash='b'.repeat(64),clone=structuredClone;

@@ -15,3 +15,5 @@
 HTTP测试使用临时数据库，算法测试使用明确的隔离输入，不向本机业务库写入验证样例。部分栅格测试需要 `requirements-raster.txt` 中的依赖。共享夹具仍放在同级测试模块，保持 `unittest discover` 的单一入口。
 
 前端隔离契约在 `scripts/verification/*.mjs`，运行 `npm run check:ui`。需要联网、正式数据或实际业务库的验证脚本须单独按说明调用，不属于默认检查。
+
+前端状态与响应校验测试在`frontend/src/tests/`，运行`npm run test:frontend`。真实浏览器回归在`frontend/e2e/`，首次执行`npx playwright install chromium`，然后`npm run test:e2e`。测试服务器独占8096，数据库与合成格网放系统临时目录，不能指向正式工作空间；不依赖卫星下载、天地图Key或模型登录。异常场景在测试浏览器中拦截，正常上传、计算和文件下载调用实际本机后端。

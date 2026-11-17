@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import {MapWorkspace} from '../../dist/map-workspace.js';
-import {MapCopilot} from '../../dist/map-copilot.js';
+import {MapWorkspace} from '../../frontend/src/workspaces/map-workspace.js';
+import {MapCopilot} from '../../frontend/src/workspaces/map-copilot.js';
 
 const storage=new Map();
 globalThis.localStorage={getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,value)};

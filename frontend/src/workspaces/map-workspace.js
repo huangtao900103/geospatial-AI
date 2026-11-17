@@ -96,10 +96,12 @@ export class MapWorkspace{
   await new Promise(resolve=>requestAnimationFrame(resolve));
   if(!this._mounted||!this.element.isConnected||generation!==this._mountGeneration)return;
   if(!this.initialized&&!this.loading)await this.initialize();
+  if(!this._mounted||generation!==this._mountGeneration)return;
   if(this.rightOpen){if(this.copilotMount)this.copilotMount(this.q('.mw-map-copilot-host'));else this.productionMount?.(this.q('.mw-production-host'))}if(this.map&&this._mounted&&generation===this._mountGeneration){this.observeSize();this.calibrateSize();this.updateContext(this.context)}
  }
  unmount(){
   if(this.map&&this.element.isConnected){this.map.stop();this.saveView()}
+  this._sizeObserver?.disconnect();this._sizeObserver=null;
   this._mounted=false;this._mountGeneration=(this._mountGeneration||0)+1;
   if(this._sizeFrame){cancelAnimationFrame(this._sizeFrame);this._sizeFrame=null}
   if(this.selectionActive)this.cancelAreaSelection();
