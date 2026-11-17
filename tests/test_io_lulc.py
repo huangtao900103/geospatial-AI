@@ -7,11 +7,11 @@ import time
 import unittest
 from pathlib import Path
 from unittest.mock import patch
-from geo_services import GeoError
-from cropland_services import CroplandServices, make_plan, product_profile, capabilities
-from io_lulc_reader import (IOLulcReader, validate_item, vectorize_crops, make_preview,
+from backend.core.geo_services import GeoError
+from backend.analysis.cropland_services import CroplandServices, make_plan, product_profile, capabilities
+from backend.analysis.io_lulc_reader import (IOLulcReader, validate_item, vectorize_crops, make_preview,
                             PRODUCT, AREA_METHOD, COLLECTION, DATA_HOST)
-from landcover_services import available
+from backend.analysis.landcover_services import available
 from test_cropland import MemoryStore
 
 
@@ -171,7 +171,7 @@ class NativeIOTest(unittest.TestCase):
     def test_service_dispatches_explicit_io_product_without_touching_worldcover(self):
         store=MemoryStore(self.root);service=CroplandServices(store,io_reader=self.reader)
         try:
-            with patch('cropland_services.account_native',side_effect=AssertionError('must not read WorldCover')):
+            with patch('backend.analysis.cropland_services.account_native',side_effect=AssertionError('must not read WorldCover')):
                 t=service.create({'bbox':self.bbox,'product':'io_lulc_2024'})
                 for _ in range(300):
                     t=service.get(t['id'])

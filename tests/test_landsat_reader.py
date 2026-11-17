@@ -4,8 +4,8 @@ from pathlib import Path
 from unittest.mock import Mock
 from importlib.util import find_spec
 from urllib.parse import parse_qs,urlsplit
-from geo_services import GeoError
-from landsat_reader import LandsatReader,specification,asset_url,QUALITY_POLICY
+from backend.core.geo_services import GeoError
+from backend.analysis.landsat_reader import LandsatReader,specification,asset_url,QUALITY_POLICY
 
 BASE='https://landsateuwest.blob.core.windows.net/landsat-c2/level-2/standard/oli-tirs/2025/123/039/LC09_TEST/'
 READY=all(find_spec(x) for x in ('numpy','rasterio','PIL'))
@@ -70,20 +70,20 @@ class LandsatNativeTest(unittest.TestCase):
   return p,b
  def test_qa_bits_water_and_saturation_masks(self):
   import numpy as np
-  from native_raster import landsat_quality
+  from backend.analysis.native_raster import landsat_quality
   q=np.array([[64,128,0]+[64|(1<<i) for i in range(6)]],dtype='float32');rad=np.zeros_like(q);epoch={'qa_pixel':q,'qa_radsat':rad};finite,good=landsat_quality(epoch);self.assertTrue(finite.all());np.testing.assert_array_equal(good,[[True,True,True,False,False,False,False,False,False]])
   rad[0,0]=2048;rad[0,1]=1;self.assertFalse(landsat_quality(epoch)[1][0,:2].any())
  def test_fractional_nan_out_of_range_qa_is_invalid(self):
   import numpy as np
-  from native_raster import landsat_quality
+  from backend.analysis.native_raster import landsat_quality
   a=np.array([[float('nan'),64.5,-1,65536,64]],dtype='float32');finite,good=landsat_quality({'qa_pixel':a,'qa_radsat':np.zeros_like(a)});self.assertEqual(int((finite&good).sum()),1)
  def test_quality_and_negative_reflectance_are_separate_reasons(self):
-  from native_raster import grids,quality_summary
+  from backend.analysis.native_raster import grids,quality_summary
   p,b=self.fixture();b['after']['qa_pixel'][0,0]=8;b['after']['qa_radsat'][0,1]=1;b['after']['red'][0,2]=-.01
   data,reasons=grids(b);self.assertEqual(int(data['after'][1].sum()),5);self.assertEqual(reasons['after']['qa_excluded'],2);self.assertEqual(reasons['after']['invalid_reflectance'],1);self.assertNotIn('scl_excluded',reasons['after']);self.assertEqual(quality_summary(b)['after']['quality_kind'],'landsat_qa')
  def test_export_preserves_calibrated_inputs_actual_qa_and_30m(self):
   import numpy as np,rasterio
-  from native_raster import compute_native
+  from backend.analysis.native_raster import compute_native
   p,b=self.fixture();b['after']['qa_pixel'][0,0]=8;r=compute_native(p,b,'test-ls',self.root,lambda:None)
   self.assertAlmostEqual(r['summary']['mean_index'],1/3,places=6);self.assertEqual(r['summary']['valid_count'],7);self.assertEqual(r['provenance']['grid']['reference_resolution_m'],30);self.assertIn('Landsat',r['report']['title']);self.assertNotIn('scl_retained',r['provenance']['quality'])
   with rasterio.open(self.root/'analysis.tif') as ds:
@@ -93,7 +93,7 @@ class LandsatNativeTest(unittest.TestCase):
   from affine import Affine
   from rasterio.transform import array_bounds
   from rasterio.warp import transform_bounds
-  from native_raster import quality_summary
+  from backend.analysis.native_raster import quality_summary
   transform=Affine(30,0,420000,0,-30,3380000);p=plan();p['aoi']['bbox']=list(transform_bounds('EPSG:32650','EPSG:4326',*array_bounds(4,4,transform),densify_pts=21));paths={};assets={}
   for band,value in [('red',10000),('nir',15000),('qa_pixel',64),('qa_radsat',0)]:
    path=self.root/(band+'.tif');paths[BASE+band+'.TIF']=str(path)

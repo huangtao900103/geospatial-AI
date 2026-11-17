@@ -9,8 +9,8 @@ import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
-from geo_services import GeoError
-from result_bundle_services import FILES,ResultBundleServices,canonical
+from backend.core.geo_services import GeoError
+from backend.core.result_bundle_services import FILES,ResultBundleServices,canonical
 
 
 class Service:

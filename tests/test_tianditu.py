@@ -13,9 +13,9 @@ from urllib.error import URLError
 from http.client import HTTPException
 from urllib.parse import parse_qs, urlsplit
 
-from geo_services import GeoError
-from search_services import SearchServices
-from tianditu_services import TiandituServices, boundary_geometry, NoRedirect
+from backend.core.geo_services import GeoError
+from backend.core.search_services import SearchServices
+from backend.integrations.tianditu_services import TiandituServices, boundary_geometry, NoRedirect
 
 TOKEN = 'a1' * 16
 OTHER_TOKEN = 'b2' * 16

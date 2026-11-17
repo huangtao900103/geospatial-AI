@@ -2,9 +2,9 @@
 import copy,json,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
-from geo_services import GeoError
-from server import Workspace
-from catalog_adapters import normalize_item,search_url
+from backend.core.geo_services import GeoError
+from backend.server import Workspace
+from backend.catalog.catalog_adapters import normalize_item,search_url
 from test_algorithm_catalog import observation
 
 class ObservationTest(unittest.TestCase):
@@ -45,7 +45,7 @@ class ObservationTest(unittest.TestCase):
   for overrides in ({'source_id':'pc_sentinel2_l2a'},{'bbox':[113,30,113.01,30.01]},{'goal':'change'},{'periods':{'before':['2024-10-01','2024-10-31'],'after':['2024-11-01','2024-11-30']}}):
    with self.assertRaises(GeoError):self.w.production.resolve_input({**body,**overrides})
  def test_actual_binding_version_is_verified_before_pixel_read(self):
-  obs=self.seed()['items'][0];body=self.w.production.resolve_input(self.body(obs));from production_services import make_plan
+  obs=self.seed()['items'][0];body=self.w.production.resolve_input(self.body(obs));from backend.analysis.production_services import make_plan
   plan=make_plan(body);assets={a['common_name']:{k:a.get(k) for k in ('href','scale','offset','nodata')} for a in obs['assets'] if a['common_name'] in ('red','nir','qa_pixel','qa_radsat')}
   scene={'id':obs['item_id'],'datetime':obs['datetime'],'platform':obs['platform'],'assets':assets};self.w.production.verify_bound_scene(plan,{'after':scene})
   for field in ('id','datetime','platform'):
@@ -57,7 +57,7 @@ class ObservationTest(unittest.TestCase):
  def test_pinned_asset_identity_uses_band_key_not_rgb_preview_channel(self):
   obs=self.seed(source='pc_sentinel2_l2a')['items'][0]
   task_input={**self.body(obs),'source_id':'pc_sentinel2_l2a'};prepared=self.w.production.resolve_input(task_input)
-  from production_services import make_plan
+  from backend.analysis.production_services import make_plan
   plan=make_plan(prepared);actual={a['common_name']:{k:a.get(k) for k in ('href','scale','offset','nodata')} for a in obs['assets'] if a['common_name'] in ('red','nir','scl')}
   with patch.object(self.repo,'get',return_value={**obs,'assets':obs['assets']+[{'key':'visual','common_name':'red','href':'https://example.invalid/rgb.tif'}]}):
    self.w.production.verify_bound_scene(plan,{'after':{'id':obs['item_id'],'datetime':obs['datetime'],'assets':actual}})

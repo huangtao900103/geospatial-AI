@@ -5,8 +5,8 @@ import sys
 import unittest
 from unittest.mock import patch
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from geo_services import GeoError
-from algorithm_catalog import catalog,match_observation
+from backend.core.geo_services import GeoError
+from backend.catalog.algorithm_catalog import catalog,match_observation
 
 
 def observation(source='pc_sentinel2_l2a'):
@@ -21,7 +21,7 @@ def observation(source='pc_sentinel2_l2a'):
 
 
 def ready(obs,index='ndvi'):
-    with patch('algorithm_catalog.runtime_ready',return_value=True):return match_observation(obs,index)['matches'][0]
+    with patch('backend.catalog.algorithm_catalog.runtime_ready',return_value=True):return match_observation(obs,index)['matches'][0]
 
 
 class ContractTest(unittest.TestCase):
@@ -34,7 +34,7 @@ class ContractTest(unittest.TestCase):
         self.assertEqual(s2['required_quality_assets'],['SCL']);self.assertEqual(ls['required_quality_assets'],['qa_pixel','qa_radsat'])
         self.assertTrue(ls['quality_policy']['water_bit_7_retained']);self.assertFalse(ls['time']['cross_sensor_change_supported'])
     def test_valid_metadata_is_request_ready_but_does_not_claim_pixel_read(self):
-        with patch('algorithm_catalog.runtime_ready',return_value=True):
+        with patch('backend.catalog.algorithm_catalog.runtime_ready',return_value=True):
             for source in ('pc_sentinel2_l2a','pc_landsat_c2_l2'):
                 result=match_observation(observation(source));self.assertEqual(result['ready_count'],11 if source=='pc_landsat_c2_l2' else 12)
                 self.assertTrue(result['metadata_only']);self.assertFalse(result['pixels_read'])
@@ -73,7 +73,7 @@ class ContractTest(unittest.TestCase):
             o=observation('pc_landsat_c2_l2');next(a for a in o['assets'] if a['key']=='red')['href']=href
             self.assertFalse(ready(o)['ready'])
     def test_missing_runtime_stages_and_invalid_time_are_not_ready(self):
-        with patch('algorithm_catalog.runtime_ready',return_value=False):
+        with patch('backend.catalog.algorithm_catalog.runtime_ready',return_value=False):
             self.assertEqual(match_observation(observation())['ready_count'],0)
         for date in ('2025-11-14','2025-11-14T02:30:00','not-a-date',None):
             o=observation();o['datetime']=date;self.assertFalse(ready(o)['ready'])

@@ -11,8 +11,8 @@ from rasterio.features import rasterize
 from rasterio.transform import from_origin
 from rasterio.warp import transform_bounds, transform_geom
 
-from adaptive_segmentation import otsu, run_segmentation, FILES
-from geo_services import GeoError
+from backend.analysis.adaptive_segmentation import otsu, run_segmentation, FILES
+from backend.core.geo_services import GeoError
 
 ROOT=Path(__file__).resolve().parents[1]
 REAL_NDVI=ROOT/'data/production/production_e4981e20877640/analysis.tif'

@@ -11,7 +11,7 @@ from urllib.error import HTTPError
 from urllib.request import Request,urlopen
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from server import Workspace, LocalServer, make_handler
+from backend.server import Workspace, LocalServer, make_handler
 
 TEST_KEY = '0123456789abcdef0123456789abcdef'
 

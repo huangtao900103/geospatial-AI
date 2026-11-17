@@ -2,7 +2,7 @@
 import copy
 import time
 import unittest
-from geo_services import GeoError
+from backend.core.geo_services import GeoError
 import test_agriculture_services as fixtures
 
 class AgricultureWorkflowsTest(unittest.TestCase):

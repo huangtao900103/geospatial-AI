@@ -9,9 +9,9 @@ import rasterio
 from rasterio.transform import from_origin
 from rasterio.warp import transform
 from PIL import Image
-from server import Workspace,LocalServer,make_handler
-from geo_services import GeoError
-from raster_processing_services import files,VERSION
+from backend.server import Workspace,LocalServer,make_handler
+from backend.core.geo_services import GeoError
+from backend.analysis.raster_processing_services import files,VERSION
 import tests.test_agriculture_services as fixtures
 
 class RasterProcessingIntegrationTest(unittest.TestCase):
@@ -83,7 +83,7 @@ class RasterProcessingIntegrationTest(unittest.TestCase):
   gate=threading.Event();entered=threading.Event()
   def discovery(plan,reader,check):entered.set();gate.wait(2);check();raise GeoError('UNIT_STOP','Isolated test abort')
   body={'algorithm_id':'temporal_mean','source_id':'pc_sentinel2_l2a','index_id':'ndvi','bbox':[114.2,30.5,114.21,30.51],'start':'2025-11-01','end':'2025-11-30','scene_limit':4,'cloud':40}
-  with patch('collection_raster.discover_collection',side_effect=discovery):
+  with patch('backend.analysis.collection_raster.discover_collection',side_effect=discovery):
    code,t=self.request('/api/raster-processing/tasks',body);self.assertEqual(code,201,t);self.assertTrue(entered.wait(2))
    self.assertEqual(self.request('/api/raster-processing/tasks/'+t['id']+'/cancel',{'extra':1})[0],400)
    code,c=self.request('/api/raster-processing/tasks/'+t['id']+'/cancel',{});self.assertEqual(code,200);self.assertEqual(c['status'],'cancelled')

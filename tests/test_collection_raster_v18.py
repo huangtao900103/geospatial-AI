@@ -14,8 +14,8 @@ import numpy as np
 import rasterio
 from affine import Affine
 
-from collection_raster import make_plan, discover_collection, reduce_stack, run_collection, _hash, _validate_manifest, VERSION, FILES
-from geo_services import GeoError
+from backend.analysis.collection_raster import make_plan, discover_collection, reduce_stack, run_collection, _hash, _validate_manifest, VERSION, FILES
+from backend.core.geo_services import GeoError
 
 
 class CollectionPlanTest(unittest.TestCase):
@@ -98,7 +98,7 @@ class CollectionExportTest(unittest.TestCase):
         m={'version':VERSION,'plan_fingerprint':p['plan_fingerprint'],'source_id':p['source_id'],'index_id':'ndvi','selected_scenes':scenes};m['selection_sha256']=_hash(m);p['collection']=m
         bands={'_mask':np.ones((2,2),bool),'metadata':{'crs':'EPSG:32650','transform':list(Affine(10,0,231000,0,-10,3377000))[:6],'cell_area_m2':100.,'input_sha256':'a'*64,'provider':'explicit offline fixture'}}
         for key,nir,scl in [('scene_00',.5,4),('scene_01',.7,4),('after',.8,9)]:bands[key]={'nir':np.full((2,2),nir,dtype='float32'),'red':np.full((2,2),.1,dtype='float32'),'scl':np.full((2,2),scl,dtype='float32')}
-        with tempfile.TemporaryDirectory() as temp,patch('native_raster.read_native',return_value=bands):
+        with tempfile.TemporaryDirectory() as temp,patch('backend.analysis.native_raster.read_native',return_value=bands):
             folder=Path(temp)/'processing_test';r=run_collection(p,object(),folder)
             self.assertEqual(set(x.name for x in folder.iterdir()),set(FILES));self.assertEqual(r['summary']['zero_valid_scene_count'],1);self.assertEqual(len(r['series']),3);self.assertIsNone(r['series'][2]['mean_index_all_valid']);self.assertEqual(r['summary']['common_support_pixel_count'],0)
             with rasterio.open(folder/'analysis.tif') as ds:
@@ -116,7 +116,7 @@ class CollectionExportTest(unittest.TestCase):
             self.assertEqual(int(np.asarray(Image.open(Path(temp)/'processing_no_support/overlay.png'))[:,:,3].sum()),0)
 
     def test_zero_quality_scene_is_read_without_aborting_native_collection(self):
-        from native_raster import read_native
+        from backend.analysis.native_raster import read_native
         from rasterio.transform import array_bounds
         from rasterio.warp import transform_bounds
         transform=Affine(10,0,720000,0,-10,3360000);bbox=list(transform_bounds('EPSG:32649','EPSG:4326',*array_bounds(4,4,transform)))
@@ -130,7 +130,7 @@ class CollectionExportTest(unittest.TestCase):
             class Reader:
                 def signed_url(self,url,check):return url
             bands=read_native(p,{'after':{'assets':assets}},Reader(),lambda:None)
-            from native_raster import grids
+            from backend.analysis.native_raster import grids
             data,_=grids(bands);self.assertEqual(int(data['after'][1].sum()),0)
             with self.assertRaises(GeoError):read_native({**p,'allow_sparse_quality':False},{'after':{'assets':assets}},Reader(),lambda:None)
 

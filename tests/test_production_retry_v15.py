@@ -4,8 +4,8 @@ import types
 import unittest
 from unittest.mock import Mock
 
-from geo_services import GeoError
-from production_services import ProductionServices
+from backend.core.geo_services import GeoError
+from backend.analysis.production_services import ProductionServices
 
 
 class FrozenRetryTest(unittest.TestCase):

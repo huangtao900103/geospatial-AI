@@ -7,10 +7,10 @@ import time
 import unittest
 from pathlib import Path
 from unittest.mock import patch
-from assistant_services import AssistantServices,METHOD,route
-from geo_services import GeoError
-from landcover_services import PRODUCT
-from server import Workspace
+from backend.workflows.assistant_services import AssistantServices,METHOD,route
+from backend.core.geo_services import GeoError
+from backend.analysis.landcover_services import PRODUCT
+from backend.server import Workspace
 
 
 def wait_answer(service,id):
@@ -70,7 +70,7 @@ class QuestionTest(unittest.TestCase):
         # Preserve the V7 assistant component contract. The default live bridge
         # and its execution lifecycle are tested in test_assistant_execution.
         self.w.assistant.use_execution=False
-        self.boundary_patch=patch('assistant_services.load_boundary',return_value=({}, {'sha256':'b'*64}));self.boundary_patch.start()
+        self.boundary_patch=patch('backend.workflows.assistant_services.load_boundary',return_value=({}, {'sha256':'b'*64}));self.boundary_patch.start()
     def tearDown(self):self.w.close();self.boundary_patch.stop();self.tmp.cleanup()
     def ask(self,question,**kw):return wait_answer(self.w.assistant,self.w.assistant.create({'question':question,**kw})['id'])
     def test_cold_start_starts_real_task_then_answer_not_fake_early(self):

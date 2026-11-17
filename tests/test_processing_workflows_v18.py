@@ -18,9 +18,9 @@ import rasterio
 from rasterio.transform import from_origin
 from rasterio.warp import transform_bounds
 
-import adaptive_segmentation
-from geo_services import GeoError
-from server import Workspace
+import backend.analysis.adaptive_segmentation as adaptive_segmentation
+from backend.core.geo_services import GeoError
+from backend.server import Workspace
 
 
 class ProcessingWorkflowsTest(unittest.TestCase):
@@ -114,7 +114,7 @@ class ProcessingWorkflowsTest(unittest.TestCase):
     def test_otsu_application_assistant_execution_result_and_named_followups_bind_one_task(self):
         entered, gate, run = self.gated_segmentation()
         body = self.body()
-        with patch('adaptive_segmentation.run_segmentation', side_effect=run):
+        with patch('backend.analysis.adaptive_segmentation.run_segmentation', side_effect=run):
             first = self.w.applications.run(body)
             self.assertTrue(entered.wait(2))
             job = self.wait_binding(first['id'])
@@ -251,7 +251,7 @@ class ProcessingWorkflowsTest(unittest.TestCase):
 
     def test_owned_cancel_stops_child_and_retry_preserves_frozen_parameters(self):
         entered, gate, run = self.gated_segmentation()
-        with patch('adaptive_segmentation.run_segmentation', side_effect=run):
+        with patch('backend.analysis.adaptive_segmentation.run_segmentation', side_effect=run):
             question = self.w.applications.run(self.body(direction='below', min_patch_pixels=2))
             self.assertTrue(entered.wait(2))
             job = self.wait_binding(question['id'])
@@ -293,7 +293,7 @@ class ProcessingWorkflowsTest(unittest.TestCase):
 
     def test_cancelling_reused_request_keeps_owner_child_running(self):
         entered, gate, run = self.gated_segmentation()
-        with patch('adaptive_segmentation.run_segmentation', side_effect=run):
+        with patch('backend.analysis.adaptive_segmentation.run_segmentation', side_effect=run):
             owner = self.w.applications.run(self.body())
             self.assertTrue(entered.wait(2))
             owner_job = self.wait_binding(owner['id'])

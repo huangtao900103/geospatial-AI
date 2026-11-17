@@ -1,0 +1,103 @@
+/* Agricultural research uses the same quiet reading surface as the workspace. */
+.customer-map .map-copilot .agri-research{--agr-ink:#29433a;--agr-muted:#63776c;--agr-rule:#d8e2da;--agr-accent:#3b7059;color:var(--agr-ink);font-size:13px;line-height:1.75;min-width:0}
+.customer-map .map-copilot .agri-research :is(button,input,select){font:inherit;box-sizing:border-box}
+.customer-map .map-copilot .agri-research button{cursor:pointer}
+.customer-map .map-copilot .agri-research button:disabled{cursor:wait;opacity:.55}
+.customer-map .map-copilot .agri-research :is(h3,h4,p){margin-top:0}
+.customer-map .map-copilot .agri-research :is(h3,h4){color:var(--agr-ink);font-weight:600;line-height:1.55}
+.customer-map .map-copilot .agri-research h3{font-size:17px;margin-bottom:6px}
+.customer-map .map-copilot .agri-research h4{font-size:14px;margin-bottom:7px}
+.customer-map .map-copilot .agr-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;border-bottom:1px solid var(--agr-rule);margin:17px 0 20px}
+.customer-map .map-copilot .agr-tabs>button{position:relative;min-width:0;min-height:41px;padding:9px 4px;border:0;border-radius:0;background:transparent;color:var(--agr-muted);font-size:12px}
+.customer-map .map-copilot .agr-tabs>button[aria-pressed=true]{color:var(--agr-accent);font-weight:600}
+.customer-map .map-copilot .agr-tabs>button[aria-pressed=true]::after{content:'';position:absolute;bottom:-1px;left:8px;right:8px;height:2px;background:var(--agr-accent)}
+.customer-map .map-copilot .agr-section-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:18px 0 14px}
+.customer-map .map-copilot .agr-section-heading p{color:var(--agr-muted);font-size:12px;line-height:1.8;margin-bottom:0}
+.customer-map .map-copilot .agr-section-heading>button,.customer-map .map-copilot .agr-back{flex:none;border:0;padding:3px 0;background:transparent;color:var(--agr-accent);font-size:12px;box-shadow:none}
+.customer-map .map-copilot .agr-series-list{border-top:1px solid var(--agr-rule)}
+.customer-map .map-copilot .agr-series-row{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:15px 0;border:0;border-bottom:1px solid var(--agr-rule);border-radius:0;background:transparent;text-align:left;color:var(--agr-ink);box-shadow:none}
+.customer-map .map-copilot .agr-series-row:hover{background:#edf3ed80}
+.customer-map .map-copilot .agr-series-row>span:first-child{min-width:0}
+.customer-map .map-copilot .agr-series-row b{display:block;font-size:14px;font-weight:550;line-height:1.6;overflow-wrap:anywhere}
+.customer-map .map-copilot .agr-series-row small{display:block;color:var(--agr-muted);font-size:11px;line-height:1.8;margin-top:3px;overflow-wrap:anywhere}
+.customer-map .map-copilot .agr-row-state{flex:none;display:flex;align-items:center;gap:9px;font-size:11px;color:var(--agr-muted);white-space:nowrap}
+.customer-map .map-copilot .agr-row-state i{font-size:16px;font-style:normal;color:#8fa298}
+.customer-map .map-copilot .agr-detail-heading{border-bottom:1px solid var(--agr-rule);padding:15px 0 12px;margin-bottom:17px}
+.customer-map .map-copilot .agr-detail-heading h3{font-size:19px}
+.customer-map .map-copilot .agr-detail-heading p{font-size:12px;color:var(--agr-muted);margin:4px 0;line-height:1.8}
+.customer-map .map-copilot :is(.agr-note,.agr-state,.agr-muted){font-size:12px;color:var(--agr-muted);line-height:1.85}
+.customer-map .map-copilot .agr-note{margin:14px 0}
+.customer-map .map-copilot .agr-state{padding:12px 0}
+.customer-map .map-copilot .agr-empty{padding:22px 15px;border:1px solid var(--agr-rule);border-radius:7px;background:#f3f6f1}
+.customer-map .map-copilot .agr-empty p{color:var(--agr-muted);font-size:12px;line-height:1.85;margin-bottom:0}
+.customer-map .map-copilot .agr-button,.customer-map .map-copilot .agr-downloads>a{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:37px;padding:7px 11px;border:1px solid #bdcec2;border-radius:5px;background:#fff;color:var(--agr-accent);text-decoration:none;font-size:12px;line-height:1.5;box-shadow:none}
+.customer-map .map-copilot .agr-button:hover,.customer-map .map-copilot .agr-downloads>a:hover{border-color:#88a895;background:#edf5ee}
+.customer-map .map-copilot .agr-empty .agr-button{margin-top:12px}
+.customer-map .map-copilot .agr-observations{margin:21px 0}
+.customer-map .map-copilot .agr-observations>article{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--agr-rule)}
+.customer-map .map-copilot .agr-observations>article>div{min-width:0}
+.customer-map .map-copilot .agr-observations b{display:block;font-size:13px;font-weight:500;font-variant-numeric:tabular-nums}
+.customer-map .map-copilot .agr-observations small{display:block;color:var(--agr-muted);font-size:11px;line-height:1.85;overflow-wrap:anywhere}
+.customer-map .map-copilot .agr-observations .agr-button{flex:none}
+.customer-map .map-copilot .agr-downloads{display:flex;flex-wrap:wrap;gap:8px;margin:19px 0}
+.customer-map .map-copilot .agr-downloads small{font-size:10px;opacity:.8;text-transform:uppercase}
+.customer-map .map-copilot .agr-provenance{border-top:1px solid var(--agr-rule);padding:12px 0;margin-top:18px;color:var(--agr-muted);font-size:12px;line-height:1.9}
+.customer-map .map-copilot .agr-provenance summary{cursor:pointer;color:#4f6a5c}
+.customer-map .map-copilot .agr-provenance p{margin:11px 0 0}
+.customer-map .map-copilot .agr-provenance ul{padding-left:18px;margin:10px 0 0}
+.customer-map .map-copilot .agr-provenance li{margin:5px 0}
+.customer-map .map-copilot .agr-provenance small{display:block;overflow-wrap:anywhere;font-size:10px;margin-top:12px}
+.customer-map .map-copilot .agr-status{display:inline-flex;align-items:center;padding:3px 7px;border:1px solid #d0dcce;border-radius:4px;background:#eef3e9;color:#5d7358;font-size:11px;line-height:1.6;white-space:nowrap}
+.customer-map .map-copilot .agr-sample-counts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin:18px 0 20px;padding:17px 0;border-block:1px solid var(--agr-rule)}
+.customer-map .map-copilot .agr-sample-counts>div{min-width:0}
+.customer-map .map-copilot .agr-sample-counts b{display:block;font-size:21px;font-weight:550;color:var(--agr-ink);font-variant-numeric:tabular-nums}
+.customer-map .map-copilot .agr-sample-counts span{display:block;margin-top:5px;font-size:11px;color:var(--agr-muted);line-height:1.6}
+.customer-map .map-copilot .agr-model-state{padding:15px 14px;border-left:2px solid #b2c6af;background:#f0f4ea}
+.customer-map .map-copilot .agr-model-state p{font-size:12px;color:var(--agr-muted);line-height:1.85;margin-bottom:0}
+.customer-map .map-copilot .agr-review-list>article{padding:15px 0;border-top:1px solid var(--agr-rule)}
+.customer-map .map-copilot .agr-review-list>article>div{display:flex;gap:9px;align-items:flex-start;justify-content:space-between}
+.customer-map .map-copilot .agr-review-list b{font-size:14px;font-weight:550;line-height:1.65}
+.customer-map .map-copilot .agr-review-list p{font-size:12px;color:var(--agr-muted);line-height:1.85;margin:7px 0 0}
+.customer-map .map-copilot .agr-review-list small{font-size:11px;color:var(--agr-muted)}
+.customer-map .map-copilot .agr-error{border-left:2px solid #b87960;padding:10px 12px;margin:12px 0;background:#f8eee8;color:#845239;font-size:12px;line-height:1.85;overflow-wrap:anywhere}
+.customer-map .map-copilot .agr-error>button{display:block;border:0;background:transparent;padding:3px 0;color:#784b32;text-decoration:underline;font-size:12px}
+.customer-map .map-copilot .agri-research :is(button,a,select,input,summary):focus-visible{outline:2px solid #5f8975;outline-offset:3px}
+.customer-map .map-copilot .agri-research .series-reading{margin:18px 0}
+.customer-map .map-copilot .agri-research .series-reading h3{font-size:15px}
+.customer-map .map-copilot .agr-field{display:flex;flex-direction:column;gap:6px;margin:13px 0;color:#536e5e;font-size:12px;line-height:1.7;min-width:0}
+.customer-map .map-copilot .agr-field>input,.customer-map .map-copilot .agr-field>select,.customer-map .map-copilot .agr-field>textarea{width:100%;min-width:0;min-height:40px;padding:8px 10px;border:1px solid #cad8cc;border-radius:5px;background:#fff;color:#29433a;font:inherit;font-size:13px;box-shadow:none}
+.customer-map .map-copilot .agr-field>textarea{resize:vertical;max-height:180px;line-height:1.8}
+.customer-map .map-copilot .agr-field>input::placeholder,.customer-map .map-copilot .agr-field>textarea::placeholder{color:#7c8e80}
+.customer-map .map-copilot .agr-field>select:disabled{background:#eef3ec;color:#8a9b8d}
+.customer-map .map-copilot .agr-primary{background:#3b7059;border-color:#3b7059;color:#fff}
+.customer-map .map-copilot .agr-primary:hover{background:#2f5c47;border-color:#2f5c47;color:#fff}
+.customer-map .map-copilot .agr-primary:disabled{background:#dce7dc;border-color:#dce7dc;color:#819783;opacity:1;cursor:default}
+.customer-map .map-copilot .agr-field-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.customer-map .map-copilot :is(.agr-sample-import,.agr-sample-batches,.agr-model-records,.agr-review-create){margin:20px 0;padding-top:18px;border-top:1px solid var(--agr-rule)}
+.customer-map .map-copilot .agr-upload{display:flex;flex-direction:column;gap:7px;padding:11px 12px;background:#eef4e9;border:1px dashed #b1c6af;border-radius:6px;color:#52724c;font-size:12px}
+.customer-map .map-copilot .agr-upload input{max-width:100%;font-size:12px;color:#57724e}
+.customer-map .map-copilot .agr-source-fields .agr-field{margin-top:12px}
+.customer-map .map-copilot .agr-sample-counts small{display:block;font-size:10px;line-height:1.7;margin-top:5px;color:var(--agr-muted)}
+.customer-map .map-copilot .agr-model-record{padding:14px 0;border-top:1px solid var(--agr-rule)}
+.customer-map .map-copilot .agr-model-record>div{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.customer-map .map-copilot .agr-model-record b{font-size:13px;font-weight:550;overflow-wrap:anywhere}
+.customer-map .map-copilot .agr-model-record p{font-size:12px;line-height:1.85;color:var(--agr-muted);margin:8px 0}
+.customer-map .map-copilot .agr-table{width:100%;border-collapse:collapse;table-layout:fixed;margin:12px 0;font-size:11px;font-variant-numeric:tabular-nums}
+.customer-map .map-copilot .agr-table :is(th,td){padding:8px 4px;text-align:left;border-bottom:1px solid var(--agr-rule);overflow-wrap:anywhere;font-weight:400}
+.customer-map .map-copilot .agr-table th{color:#516d5a}
+.customer-map .map-copilot .agr-table td{color:#29433a}
+.customer-map .map-copilot .agr-candidate{border-top:1px solid var(--agr-rule);padding:12px 0}
+.customer-map .map-copilot .agr-candidate>summary{cursor:pointer;color:#395c46;font-size:13px;line-height:1.8}
+.customer-map .map-copilot .agr-candidate>summary>span{float:right;font-size:11px;color:var(--agr-muted)}
+.customer-map .map-copilot .agr-candidate>p{font-size:12px;color:var(--agr-muted);margin:10px 0}
+.customer-map .map-copilot .agr-review-list .agr-button{margin-top:11px}
+.customer-map .map-copilot .agr-model-state ul{font-size:12px;line-height:1.85;color:var(--agr-muted);margin:10px 0 0;padding-left:17px}
+.customer-map .map-copilot .agr-model-state li{margin-top:5px}
+.customer-map .map-copilot .agr-quality{font-size:12px;line-height:1.8;color:#7d6533;background:#f5efdf;border-left:2px solid #b49a5a;padding:10px 12px}
+.customer-map .map-copilot .mc-research-answer .mc-other-metrics{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.customer-map .map-copilot .mc-research-answer .mc-other-metrics>div{min-width:0;padding:9px}
+.customer-map .map-copilot .mc-research-answer .mc-other-metrics>div>span{font-size:11px;line-height:1.6;overflow-wrap:anywhere}
+.customer-map .map-copilot .mc-research-answer .mc-other-metrics>div>b{font-size:20px;line-height:1.6}
+@media(max-width:760px){.customer-map .map-copilot .agr-tabs>button{min-height:44px}.customer-map .map-copilot .agr-button{min-height:42px}.customer-map .map-copilot .agr-series-row{gap:8px}.customer-map .map-copilot .agr-row-state{gap:5px;font-size:10px}.customer-map .map-copilot .agr-sample-counts{gap:8px}.customer-map .map-copilot .agr-sample-counts b{font-size:19px}.customer-map .map-copilot .agr-detail-heading h3{font-size:18px}}
+@media(max-width:760px){.customer-map .map-copilot .agr-field>input,.customer-map .map-copilot .agr-field>select,.customer-map .map-copilot .agr-field>textarea{font-size:16px;min-height:43px}.customer-map .map-copilot .agr-field-pair{gap:8px}.customer-map .map-copilot .agr-field-pair .agr-field>select{font-size:14px}}
+.atlas-reference-boundary.leaflet-interactive{pointer-events:stroke}

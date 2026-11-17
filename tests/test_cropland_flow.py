@@ -4,10 +4,10 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
-from server import Workspace
-from cropland_services import CroplandServices
-from landcover_services import available
-from assistant_services import route
+from backend.server import Workspace
+from backend.analysis.cropland_services import CroplandServices
+from backend.analysis.landcover_services import available
+from backend.workflows.assistant_services import route
 
 
 @unittest.skipUnless(available(), 'native raster environment required')

@@ -1,0 +1,141 @@
+{
+  "reviewed_at": "2026-11-16T14:52:20.563235+00:00",
+  "article": "https://mp.weixin.qq.com/s/Tvo1wX3jzfB_fQUjsZzisA",
+  "article_title": "农作物遥感数据集从哪里下载：数据整理",
+  "verification_method": "article read in a normal browser; metadata cross-checked against original dataset/paper pages",
+  "sources": [
+    {
+      "key": "earice10-2023",
+      "name": "EARice10 东亚水稻分布（2023，10米）",
+      "endpoint": "https://zenodo.org/records/13118409",
+      "protocol": "Zenodo / GeoTIFF",
+      "years": [
+        2023
+      ],
+      "resolution_m": 10,
+      "data_role": "published_classification_reference",
+      "license": "not_verified",
+      "scope": "东亚；尚未取得可读取像元，不限定单一地市。",
+      "workspace_source_id": "draft_0138397b4f3b4c",
+      "integration_status": "registered_not_connected",
+      "metadata_reviewed": true,
+      "raster_downloaded": false,
+      "local_accuracy_validated": false,
+      "is_independent_local_crop_ground_truth": false,
+      "integration_blocker": "Local Zenodo connection refused",
+      "platform_shared": true,
+      "city_specific_source": false
+    },
+    {
+      "key": "globalrice20",
+      "name": "GlobalRice20 水稻分布（2015/2024，20米）",
+      "endpoint": "https://zenodo.org/records/18168302",
+      "protocol": "Zenodo / GeoTIFF",
+      "years": [
+        2015,
+        2024
+      ],
+      "resolution_m": 20,
+      "data_role": "published_classification_reference",
+      "license": "CC-BY-4.0 (ESA collection declaration)",
+      "scope": "全球产品声明覆盖；当前接通2024年ESA COG，每次分析按实际范围核验有效数据。",
+      "workspace_source_id": "globalrice20_2024_esa",
+      "integration_status": "analysis_ready_2024_via_esa",
+      "metadata_reviewed": true,
+      "raster_downloaded": true,
+      "local_accuracy_validated": false,
+      "is_independent_local_crop_ground_truth": false,
+      "previous_draft_id": "draft_a4ead0ed860649",
+      "native_pixels_read": true,
+      "whole_original_file_downloaded": false,
+      "actual_metadata_url": "https://catalogue.weed.apex.esa.int/collections/Anthropogenic-V2/items/global_2024_22",
+      "verified_years": [
+        2024
+      ],
+      "product_id": "xiantao-rice-2024-globalrice20",
+      "acquisition_mode": "bounded native windows from ESA COG; no whole original Zenodo tile download",
+      "platform_shared": true,
+      "city_specific_source": false,
+      "verified_regions": [
+        "仙桃市",
+        "天门市",
+        "潜江市"
+      ],
+      "analysis_scopes": [
+        "selected_aoi",
+        "administrative_reference"
+      ]
+    },
+    {
+      "key": "lgiser-cfd-2020",
+      "name": "LGISer-CFD 江汉平原等耕地地块（2020，许可受限）",
+      "endpoint": "https://www.scidb.cn/en/detail?dataSetId=96944ee82e5141ce86a240f5854e10ab",
+      "protocol": "ScienceDB / Dataset",
+      "years": [
+        2020
+      ],
+      "resolution_m": 1,
+      "resolution_note": "1米为源影像声明分辨率，不代表地块位置精度。",
+      "data_role": "parcel_reference_and_segmentation_samples",
+      "license": "CC BY-NC-ND 4.0 (publisher-reported)",
+      "scope": "江汉平原、洞庭湖、鄱阳湖等研究区域；需逐次核实当地文件覆盖及许可条件。",
+      "workspace_source_id": "draft_42fbeb9b22b44a",
+      "integration_status": "registered_not_connected",
+      "metadata_reviewed": true,
+      "raster_downloaded": false,
+      "local_accuracy_validated": false,
+      "is_independent_local_crop_ground_truth": false,
+      "integration_blocker": "Dataset license/access and exact regional file coverage must be verified",
+      "platform_shared": true,
+      "city_specific_source": false
+    },
+    {
+      "key": "cn-wheat10",
+      "name": "CN_Wheat10 春冬小麦分布（2018—2024，10米）",
+      "endpoint": "https://doi.org/10.6084/m9.figshare.28852220.v2",
+      "protocol": "Figshare / GeoTIFF",
+      "years": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "resolution_m": 10,
+      "data_role": "published_classification_reference",
+      "license": "not_verified",
+      "scope": "论文声明的中国小麦主产区；具体省市、年份及文件覆盖尚待核实。",
+      "paper": "https://essd.copernicus.org/articles/18/465/2026/essd-18-465-2026.html",
+      "workspace_source_id": "draft_69d5ae95379240",
+      "integration_status": "registered_not_connected",
+      "metadata_reviewed": true,
+      "raster_downloaded": false,
+      "local_accuracy_validated": false,
+      "is_independent_local_crop_ground_truth": false,
+      "integration_blocker": "Figshare HTTP403; alternate official portal requires account",
+      "platform_shared": true,
+      "city_specific_source": false
+    }
+  ],
+  "access_failures": {
+    "zenodo_rest_api": "local connection refused",
+    "figshare_rest_api": "HTTP 403"
+  },
+  "limitations": [
+    "Published crop maps are historical model products, not independent current local labels.",
+    "Provider accuracy is not local validation accuracy.",
+    "LGISer-CFD 2020 parcels do not prove current boundaries or crop species.",
+    "GlobalRice20 2024 analysis is connected via the ESA ECDC redistribution; 2015 remains unconnected. Other candidates are not executable yet."
+  ],
+  "integration_policy": {
+    "role": "platform_shared_sources",
+    "region_binding": "coverage and year driven; no city-specific source copies",
+    "selection_modes": [
+      "map_aoi",
+      "administrative_reference"
+    ],
+    "provenance": "each result freezes dataset, year, native pixels, boundary and hashes; provider/local accuracy remain separate"
+  }
+}

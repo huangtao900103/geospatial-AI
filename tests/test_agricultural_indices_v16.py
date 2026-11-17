@@ -7,13 +7,13 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 from importlib.util import find_spec
-from geo_services import GeoError
-from spectral_indices import specification,choose_index,detect_indices,evaluate_index,BANDS
-from landsat_reader import specification as landsat_specification
-from algorithm_catalog import contract,catalog,match_observation
-from catalog_adapters import assets_metadata
-from production_services import SentinelReader
-from native_raster import grids,compute_native,read_native
+from backend.core.geo_services import GeoError
+from backend.analysis.spectral_indices import specification,choose_index,detect_indices,evaluate_index,BANDS
+from backend.analysis.landsat_reader import specification as landsat_specification
+from backend.catalog.algorithm_catalog import contract,catalog,match_observation
+from backend.catalog.catalog_adapters import assets_metadata
+from backend.analysis.production_services import SentinelReader
+from backend.analysis.native_raster import grids,compute_native,read_native
 from tests.test_algorithm_catalog import observation
 
 READY=all(find_spec(module) for module in ('numpy','rasterio','PIL'))
@@ -57,7 +57,7 @@ class AgriculturalContractTest(unittest.TestCase):
         self.assertFalse(blocked['available']);self.assertFalse(blocked['source_supported'])
         self.assertEqual(blocked['required_bands'],[]);self.assertEqual(blocked['blocking_reasons'][0]['code'],'SOURCE_INDEX_UNSUPPORTED')
         self.assertEqual(len(catalog()['contracts']),23)
-        with patch('algorithm_catalog.runtime_ready',return_value=True):
+        with patch('backend.catalog.algorithm_catalog.runtime_ready',return_value=True):
             match=match_observation(observation('pc_landsat_c2_l2'),'ndre')['matches'][0]
         self.assertFalse(match['ready']);self.assertIn('SOURCE_INDEX_UNSUPPORTED',[g['code'] for g in match['gaps']])
         with self.assertRaises(GeoError) as error:landsat_specification('ndre')
@@ -67,7 +67,7 @@ class AgriculturalContractTest(unittest.TestCase):
         result={a['key']:a for a in assets_metadata('pc_sentinel2_l2a',assets,{'gsd':10})}
         self.assertEqual([(result[k]['common_name'],result[k]['resolution']) for k in ('B02','B05','B8A')],[('blue',10),('rededge',20),('nir_narrow',20)])
         o=observation();o['assets']=[a for a in o['assets'] if a['key'] not in assets]+list(result.values())
-        with patch('algorithm_catalog.runtime_ready',return_value=True):self.assertTrue(match_observation(o,'ndre')['matches'][0]['ready'])
+        with patch('backend.catalog.algorithm_catalog.runtime_ready',return_value=True):self.assertTrue(match_observation(o,'ndre')['matches'][0]['ready'])
     def test_exact_xml_offsets_for_new_required_bands(self):
         reader=SentinelReader(None)
         xml=('<r><BOA_QUANTIFICATION_VALUE>10000</BOA_QUANTIFICATION_VALUE>'+''.join('<BOA_ADD_OFFSET band_id="%d">%d</BOA_ADD_OFFSET>'%(i,-1000-i) for i in range(13))+'</r>').encode()

@@ -5,8 +5,8 @@ import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 from importlib.util import find_spec
-from raster_cache import RasterWindowCache
-from geo_services import GeoError
+from backend.analysis.raster_cache import RasterWindowCache
+from backend.core.geo_services import GeoError
 
 @unittest.skipUnless(find_spec('numpy'),'numpy runtime required')
 class RasterCacheTest(unittest.TestCase):

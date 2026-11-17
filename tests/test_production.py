@@ -7,10 +7,10 @@ import time
 import unittest
 from pathlib import Path
 from unittest.mock import patch
-from geo_services import GeoError, PublicSources
-from production_services import (make_plan, ndvi_grid, compute_product, sample_bands, SentinelReader,
+from backend.core.geo_services import GeoError, PublicSources
+from backend.analysis.production_services import (make_plan, ndvi_grid, compute_product, sample_bands, SentinelReader,
                                  SAMPLE_BBOX, capabilities, asset_url, raster_available)
-from server import Workspace
+from backend.server import Workspace
 
 
 def settled(service, task_id):
@@ -144,7 +144,7 @@ class LifecycleTest(unittest.TestCase):
         class Failing:
             def discover(self,p,c):raise GeoError('NO_SUITABLE_SCENE','no scene',422)
         self.w.production.reader=Failing()
-        with patch('production_services.raster_available',return_value=True),patch('production_services.sample_bands') as sample:
+        with patch('backend.analysis.production_services.raster_available',return_value=True),patch('backend.analysis.production_services.sample_bands') as sample:
             task=self.w.production.create({'requirement':'2025年10月NDVI','mode':'sentinel_cog'});done=settled(self.w.production,task['id'])
         self.assertEqual(done['status'],'failed');self.assertIsNone(done['result']);sample.assert_not_called()
     def test_cancel_retry_immutable_snapshot(self):
@@ -154,20 +154,20 @@ class LifecycleTest(unittest.TestCase):
                 entered.set()
                 while True:check();time.sleep(.005)
         self.w.production.reader=Hold()
-        with patch('production_services.raster_available',return_value=True):
+        with patch('backend.analysis.production_services.raster_available',return_value=True):
             task=self.w.production.create({'requirement':'2025年10月NDVI','mode':'sentinel_cog'});self.assertTrue(entered.wait(1))
             cancelled=self.w.production.cancel(task['id']);self.assertEqual(cancelled['status'],'cancelled');time.sleep(.03)
             self.assertEqual(self.w.production.get(task['id'])['status'],'cancelled')
             again=self.w.production.retry(task['id']);self.assertNotEqual(again['id'],task['id']);self.assertEqual(again['plan']['aoi'],task['plan']['aoi']);self.w.production.cancel(again['id'])
     def test_dependency_gap_is_explicit(self):
-        with patch('production_services.raster_available',return_value=False):
+        with patch('backend.analysis.production_services.raster_available',return_value=False):
             task=self.w.production.create({'requirement':'NDVI分析','mode':'sentinel_cog'});done=settled(self.w.production,task['id'])
         self.assertEqual(done['status'],'failed');self.assertEqual(done['error']['code'],'BLOCKING_GAPS')
     def test_recovery_marks_unfinished_failed(self):
         plan=make_plan({'requirement':'NDVI分析'})
         record={'id':'production-interrupted','name':'test','status':'running','plan':plan,'snapshot':plan,'logs':[],'nodes':[{'id':'read','status':'running'}],'result':None,'created_at':'2025-01-01'}
         self.w.save('production_task',record)
-        from production_services import ProductionServices
+        from backend.analysis.production_services import ProductionServices
         recovered=ProductionServices(self.w).get(record['id']);self.assertEqual(recovered['status'],'failed');self.assertEqual(recovered['error']['code'],'INTERRUPTED');self.assertEqual(recovered['nodes'][0]['status'],'failed');self.assertTrue(recovered['nodes'][0]['finished_at'])
 
 

@@ -8,12 +8,12 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 from importlib.util import find_spec
-from geo_services import GeoError
-from spectral_indices import specification,choose_index,detect_indices,available_indices,BANDS
-from production_services import make_plan,SentinelReader
-from native_raster import grids,compute_native,read_native,VERSION
-from raster_cache import RasterWindowCache
-from server import Workspace
+from backend.core.geo_services import GeoError
+from backend.analysis.spectral_indices import specification,choose_index,detect_indices,available_indices,BANDS
+from backend.analysis.production_services import make_plan,SentinelReader
+from backend.analysis.native_raster import grids,compute_native,read_native,VERSION
+from backend.analysis.raster_cache import RasterWindowCache
+from backend.server import Workspace
 
 READY=all(find_spec(x) for x in ('numpy','rasterio','PIL'))
 BOX=[114.2,30.5,114.21,30.51]
@@ -116,7 +116,7 @@ class SpectralWindowTest(unittest.TestCase):
         for name,res,value in [('green',10,4000),('nir',10,6000),('swir1',20,3000),('scl',20,4)]:
             path=self.root/(name+'.tif');self.paths[name]=str(path);size=160//res
             with rasterio.open(path,'w',driver='GTiff',height=size,width=size,count=1,dtype='uint16',crs='EPSG:32649',transform=from_origin(720000,3360000,res,res),nodata=0) as d:d.write(np.full((size,size),value,dtype='uint16'),1)
-        self.box=list(transform_bounds('EPSG:32649','EPSG:4326',720020,3359860,720140,3359980));self.cache=RasterWindowCache();self.patch=patch('raster_cache.WINDOW_CACHE',self.cache);self.patch.start()
+        self.box=list(transform_bounds('EPSG:32649','EPSG:4326',720020,3359860,720140,3359980));self.cache=RasterWindowCache();self.patch=patch('backend.analysis.raster_cache.WINDOW_CACHE',self.cache);self.patch.start()
     def tearDown(self):self.patch.stop();self.tmp.cleanup()
     def read(self,id):
         p=plan(id,bbox=self.box);assets={b['name']:{'href':self.paths[b['name']],'scale':.0001,'offset':-.1,'nodata':0} for b in p['index']['required_bands']};assets['scl']={'href':self.paths['scl'],'scale':1,'offset':0,'nodata':0};scenes={'after':{'id':'offline-fixture','datetime':'2025-11-15T00:00:00Z','assets':assets}}

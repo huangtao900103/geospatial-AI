@@ -1,0 +1,210 @@
+/* Real agricultural products, with a searchable, vertical selection list. */
+body.map-mode{--space-ink:#0c2732;--space-deep:#071c26;--space-accent:#326f7a;--space-jade:#c0e3e5;--reading-accent:#326f7a;background:#071c26}
+body.map-mode .sidebar{background:linear-gradient(180deg,#0d2a35,#071b25);border-right-color:#87cbd415}
+body.map-mode .topbar{border-bottom-color:#89cad323;background:#071c26}
+body.map-mode .topbar::after{content:'';position:absolute;left:25px;right:25px;bottom:0;height:1px;pointer-events:none;background:linear-gradient(90deg,transparent,#91d7df35 35%,#91d7df15 75%,transparent)}
+body.map-mode .map-workspace{border-color:#83c8d336;box-shadow:0 12px 36px #03101b38,inset 0 0 0 1px #93d4da0d}
+body.map-mode .map-workspace::after{content:'';position:absolute;inset:0;z-index:500;pointer-events:none;border-radius:inherit;background:linear-gradient(#91d9e05c,#91d9e05c) left 14px top 14px/16px 1px no-repeat,linear-gradient(#91d9e05c,#91d9e05c) left 14px top 14px/1px 16px no-repeat,linear-gradient(#91d9e05c,#91d9e05c) right 14px top 14px/16px 1px no-repeat,linear-gradient(#91d9e05c,#91d9e05c) right 14px top 14px/1px 16px no-repeat,linear-gradient(#91d9e040,#91d9e040) left 14px bottom 14px/16px 1px no-repeat,linear-gradient(#91d9e040,#91d9e040) left 14px bottom 14px/1px 16px no-repeat,linear-gradient(#91d9e040,#91d9e040) right 14px bottom 14px/16px 1px no-repeat,linear-gradient(#91d9e040,#91d9e040) right 14px bottom 14px/1px 16px no-repeat}
+body.map-mode .customer-map .mw-copilot-panel:has(.map-copilot){border-color:#b6cbca;box-shadow:0 18px 52px #031b2930,0 0 0 1px #9cd8dc09}
+body.map-mode .customer-map .mw-live-dot{background:#a5dce2;box-shadow:0 0 0 4px #7fcad70b;animation:none}
+body.map-mode .customer-map .mw-coordinate{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;color:#b1d6dc;font-variant-numeric:tabular-nums}
+body.map-mode .customer-map .mw-toolbar>.mw-search-wrap,body.map-mode .customer-map .mw-tool-group{border-color:#88c5d137}
+:is(.agri-atlas,.map-copilot .agri-atlas){--atlas-ink:#dceef0;--atlas-muted:#a0bac2;--atlas-cyan:#77d8df;--atlas-rule:#5f9eae3b;position:relative;isolation:isolate;margin:18px 0 24px;padding:18px;border:1px solid var(--atlas-rule);border-radius:14px;background:radial-gradient(ellipse at 100% 0,#16586b35,transparent 60%),linear-gradient(145deg,#0d2832,#0a1e29);color:var(--atlas-ink);box-shadow:0 9px 24px #071e2919;overflow:hidden;font-size:13px;line-height:1.65}
+:is(.agri-atlas,.map-copilot .agri-atlas)::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(#72c8d709 1px,transparent 1px),linear-gradient(90deg,#72c8d709 1px,transparent 1px);background-size:28px 28px;mask-image:linear-gradient(180deg,#000,transparent 70%)}
+:is(.agri-atlas,.map-copilot .agri-atlas)::after{content:'';position:absolute;top:0;left:18px;width:54px;height:2px;background:var(--atlas-cyan);opacity:.65;pointer-events:none}
+:is(.agri-atlas,.map-copilot .agri-atlas) :is(button,a){-webkit-tap-highlight-color:transparent}
+:is(.agri-atlas,.map-copilot .agri-atlas) button{font:inherit;cursor:pointer}
+:is(.agri-atlas,.map-copilot .agri-atlas) button:disabled{cursor:wait;opacity:.6}
+:is(.agri-atlas,.map-copilot .agri-atlas) svg{height:17px;width:17px;flex:none;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.55}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 8px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-eyebrow{color:#82abb5;font-size:11px;letter-spacing:.05em}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-heading h3,:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-detail-heading h3{color:#e6f5f5;font-size:18px;line-height:1.5;font-weight:550;margin:3px 0 0;letter-spacing:.01em}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-ready-count{font-size:11px;white-space:nowrap;padding:3px 7px;border:1px solid #70bdca3d;border-radius:5px;color:#b5dce0;font-variant-numeric:tabular-nums;background:#113c4559}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-intro,:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-empty,:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-state{font-size:12px;line-height:1.8;color:var(--atlas-muted);margin:9px 0 14px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-products{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(228px,82%);gap:10px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:#6b9aa5 #0b2029;padding:3px 1px 10px;margin:0 -1px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-products::-webkit-scrollbar{height:5px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-products::-webkit-scrollbar-track{background:#0b2029;border-radius:5px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-products::-webkit-scrollbar-thumb{background:#6b9aa5;border-radius:5px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-browse-hint{display:flex;align-items:center;gap:5px;margin:2px 0 8px;color:#91b7c1;font-size:11px;line-height:1.7}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-browse-hint svg{height:12px;width:12px}
+:is(.agri-atlas,.map-copilot .agri-atlas).atlas-compact{padding:13px;margin:15px 0 19px}
+:is(.agri-atlas,.map-copilot .agri-atlas).atlas-compact .atlas-eyebrow{display:none}
+:is(.agri-atlas,.map-copilot .agri-atlas).atlas-compact .atlas-heading{margin-bottom:4px}
+:is(.agri-atlas,.map-copilot .agri-atlas).atlas-compact .atlas-heading h3{font-size:16px;margin:0}
+:is(.agri-atlas,.map-copilot .agri-atlas).atlas-compact .atlas-product-card{padding:12px}
+:is(.agri-atlas,.map-copilot .agri-atlas).atlas-compact .atlas-card-period{font-size:11px;line-height:1.6}
+:is(.agri-atlas,.map-copilot .agri-atlas).atlas-compact .atlas-card-scope,:is(.agri-atlas,.map-copilot .agri-atlas).atlas-compact .atlas-card-metrics em,:is(.agri-atlas,.map-copilot .agri-atlas).atlas-compact .atlas-card-metrics .atlas-card-secondary{display:none}
+:is(.agri-atlas,.map-copilot .agri-atlas).atlas-compact .atlas-card-metrics{gap:0;margin:8px 0;padding-top:8px}
+:is(.agri-atlas,.map-copilot .agri-atlas).atlas-compact .atlas-card-action{font-size:11px;padding-top:8px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-product-card{scroll-snap-align:start;display:flex;flex-direction:column;align-items:stretch;text-align:left;min-width:0;padding:14px;border:1px solid #5f93a33d;border-radius:10px;background:linear-gradient(150deg,#153b4599,#0e2934d9);color:var(--atlas-ink);box-shadow:none;transition:border-color .16s ease,background .16s ease}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-product-card:hover{border-color:#74cad47d;background:linear-gradient(150deg,#17434c,#102f3c)}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-card-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;color:#8fced7}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-card-identity{display:inline-flex;align-items:center;gap:6px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-card-identity small{font-size:11px;color:#9bbec7}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-status{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:400;line-height:1.6;border:1px solid #89b5be42;border-radius:4px;padding:2px 6px;color:#a9c8d0;background:#193b4652;white-space:nowrap}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-status::before{content:'';height:4px;width:4px;border-radius:50%;background:currentColor}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-status-ready{color:#9fe1cb;border-color:#8ccab740;background:#154a3c35}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-status-reference{color:#d8cba6;border-color:#bca67545;background:#54421f22}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-status-failed{color:#e5a7a1;border-color:#ca8b8645;background:#5b302833}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-product-card>strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:14px;font-weight:550;color:#e1f1f1;line-height:1.5;letter-spacing:0;margin:0 0 5px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-card-period{display:block;color:#b0d1d7;font-size:12px;line-height:1.7;margin-bottom:3px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-card-scope{display:block;color:#99b7c0;font-size:11px;line-height:1.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-card-metrics{display:grid;grid-template-columns:minmax(0,1fr);gap:5px;margin:9px 0 8px;padding-top:8px;border-top:1px solid #75a8b326}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-card-metrics>span{min-width:0}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-card-metrics b{display:block;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:23px;font-weight:500;color:#d8f0ef;line-height:1.35;white-space:nowrap;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-card-metrics b>small{font-family:inherit;font-size:10px;font-weight:400;color:#94b8bf;margin-left:4px;letter-spacing:0;white-space:nowrap}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-card-metrics em{display:block;font-size:11px;font-style:normal;color:#9cb9c1;line-height:1.6;margin-top:4px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-card-metrics .atlas-card-secondary{display:flex;flex-direction:row-reverse;justify-content:space-between;align-items:center;gap:8px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-card-secondary b{font-size:12px;font-weight:400;letter-spacing:0}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-card-secondary em{margin:0;font-size:11px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-card-action{display:flex;justify-content:space-between;align-items:center;gap:8px;color:#91d1d8;font-size:12px;padding-top:10px;margin-top:auto;border-top:1px solid #75a8b320}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-back,:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-expand{display:flex;align-items:center;gap:7px;border:0;padding:2px 0;color:#a4d5da;background:transparent;font-size:12px;text-align:left;box-shadow:none}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-expand{margin-top:8px;justify-content:space-between;width:100%}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-detail-heading{margin-top:18px;padding-bottom:15px;border-bottom:1px solid var(--atlas-rule)}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-detail-heading h3{font-size:21px;margin:9px 0 8px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-detail-heading p{font-size:12px;color:#adc9d0;margin:3px 0;line-height:1.8}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-description{font-size:13px;color:#c2d8dd;line-height:1.85;margin:17px 0}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-detail-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px 13px;padding:19px 0;margin-bottom:6px;border-bottom:1px solid var(--atlas-rule)}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-metric{min-width:0}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-metric:first-child{grid-column:1/-1}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-metric>b{display:block;color:#dff3f0;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:22px;font-weight:500;line-height:1.3;letter-spacing:-.04em;white-space:nowrap;font-variant-numeric:tabular-nums}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-metric:first-child>b{font-size:29px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-metric>b>small{font-size:11px;letter-spacing:0;color:#9cc1c7;font-weight:400;margin-left:5px;white-space:nowrap}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-metric>span{display:block;color:#9cbac3;font-size:12px;line-height:1.7;margin-top:6px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:17px 0}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-map-primary,:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-secondary,:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-download{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:35px;padding:8px 11px;border:1px solid #71b8c15c;border-radius:7px;background:#163b45;color:#c1e7e9;font-size:12px;font-weight:450;line-height:1.4;text-decoration:none;box-shadow:none}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-map-primary{background:#b4e3e2;border-color:#b4e3e2;color:#123740}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-map-primary:hover{background:#d1f0ec}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-download{font-size:11px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-download small{font-size:10px;opacity:.7;text-transform:uppercase}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-nospatial{margin:0;padding:10px 11px;border-left:2px solid #b4a16c;background:#8d78220d;color:#c9c5ad;font-size:12px;line-height:1.8}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-error{padding:10px 11px;border:1px solid #b37a754a;border-radius:7px;background:#6f3f3b20;color:#e3b2aa;font-size:12px;line-height:1.8;margin:13px 0;overflow-wrap:anywhere}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-error button{color:#cde9e7;font:inherit;font-size:12px;border:0;background:transparent;text-decoration:underline;padding:2px 5px}
+:is(.agri-atlas,.map-copilot .agri-atlas) :is(.atlas-layers,.atlas-provenance){border-top:1px solid var(--atlas-rule);padding-top:11px;margin-top:15px}
+:is(.agri-atlas,.map-copilot .agri-atlas) summary{cursor:pointer;color:#accbd2;font-size:12px;line-height:1.8}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-layers section{padding:10px 0}
+:is(.agri-atlas,.map-copilot .agri-atlas) :is(.atlas-layers,.atlas-boundaries) h4{font-size:12px;font-weight:500;color:#bfdadd;margin:5px 0 8px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 10px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-legend>span{display:flex;gap:6px;align-items:flex-start;color:#aac5cb;font-size:11px;line-height:1.5}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-legend i{height:8px;width:8px;flex:none;border-radius:2px;margin-top:4px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-boundaries{margin-top:16px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-boundaries ul{padding-left:17px;margin:0}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-boundaries li{font-size:12px;color:#adc5cd;line-height:1.85;margin:6px 0}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-provenance p,:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-provenance li{color:#a9c4cd;font-size:12px;line-height:1.9;overflow-wrap:anywhere}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-provenance ol{padding-left:19px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-provenance a{color:#93d2db;text-underline-offset:3px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-provenance small{display:block;font-size:11px;color:#87a8b2}
+:is(.agri-atlas,.map-copilot .agri-atlas) :is(button,a,summary):focus-visible{outline:2px solid #7cdee0;outline-offset:3px}
+:is(.agri-atlas,.map-copilot .agri-atlas) [hidden]{display:none!important}
+@media(max-width:760px){:is(.agri-atlas,.map-copilot .agri-atlas){padding:15px;margin:15px 0 20px;border-radius:12px}:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-heading h3{font-size:17px}:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-ready-count{font-size:10px;padding:3px 5px}:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-products{grid-auto-columns:minmax(220px,88%)}:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-detail-heading h3{font-size:20px}:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-metric>b{font-size:20px}:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-metric:first-child>b{font-size:26px}:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-detail-metrics{gap:15px 11px}}
+@media(prefers-reduced-motion:reduce){:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-product-card{transition:none}}
+
+/* Reviewed result recovery, quality and unified regional history. */
+.agri-atlas .atlas-quality-warning,.atlas-map-legend .atlas-quality-warning{display:block;border-left:2px solid #d9b36b;color:#e4cea6;background:#88632120;padding:8px 10px;line-height:1.7;font-size:12px;margin:10px 0;white-space:normal}
+.agri-atlas .atlas-quality-warning>b,.atlas-map-legend .atlas-quality-warning>b{display:block;color:#efd4a0;font-size:12px;font-weight:550}
+.agri-atlas .atlas-product-card .atlas-quality-warning{margin:5px 0;padding:3px 6px;font-size:10px}
+.agri-atlas .atlas-version-notice{font-size:12px;line-height:1.8;padding:11px;border:1px solid #89b5be42;border-radius:6px;color:#c0d7dd;background:#20424c40;overflow-wrap:anywhere}
+.mc-atlas-answer>.agri-atlas{margin:14px 0 16px}
+.map-copilot .mc-task-search{display:block;margin:14px 0 10px}
+.map-copilot .mc-task-search input{width:100%;height:40px;padding:8px 11px;border:1px solid #cfdbcf;border-radius:8px;background:#fff;color:#243936;font:inherit;font-size:13px;box-sizing:border-box}
+.map-copilot .mc-task-search input:focus-visible{outline:2px solid #326f7a;outline-offset:2px}
+.map-copilot .mc-regional-history{margin:14px 0 20px;padding:13px;border:1px solid #c5d8d3;border-radius:10px;background:#edf3ed}
+.map-copilot .mc-regional-history h4,.map-copilot .mc-run-history-heading{font-size:13px;line-height:1.6;margin:1px 0 8px;color:#244f4b}
+.map-copilot .mc-regional-history>p{font-size:11px;line-height:1.8;color:#61746e;margin:0 0 9px}
+.map-copilot .mc-regional-history>button{width:100%;display:flex;gap:10px;align-items:center;justify-content:space-between;text-align:left;padding:11px 0;border:0;border-top:1px solid #d6e2d8;background:transparent;color:#23443f;border-radius:0;box-shadow:none}
+.map-copilot .mc-regional-history>button>span{min-width:0}
+.map-copilot .mc-regional-history b{display:block;font-size:13px;font-weight:550;line-height:1.6;overflow-wrap:anywhere}
+.map-copilot .mc-regional-history small{display:block;font-size:11px;line-height:1.7;color:#60796e}
+.map-copilot .mc-regional-history svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6}
+.map-copilot .mc-regional-history .atlas-quality-warning{font-size:11px;line-height:1.6;color:#82632c}
+.mw-atlas-recovery{position:absolute;z-index:820;left:24px;bottom:95px;max-width:330px;padding:15px;border:1px solid #bba87770;border-radius:10px;background:#102f38f2;color:#deeceb;font-size:12px;line-height:1.7}
+.mw-atlas-recovery b{font-size:13px;color:#ead2a2}.mw-atlas-recovery p{margin:7px 0 11px}.mw-atlas-recovery button{font:inherit;color:#d2e6e5;background:#27505a;border:1px solid #789a9a66;border-radius:5px;padding:6px 8px;margin-right:6px}.mw-map-tools button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:760px){.mw-atlas-recovery{left:12px;right:12px;bottom:90px;max-width:none}.map-copilot .mc-regional-history{padding:11px}.map-copilot .mc-regional-history small{font-size:10px}.map-copilot .mc-task-search input{font-size:16px}}
+
+.map-copilot .mc-regional-history>summary{cursor:pointer;color:#244f4b;font-size:13px;font-weight:550;line-height:1.7;padding:1px 0}.map-copilot .mc-regional-history[open]>summary{margin-bottom:9px}.map-copilot .mc-regional-history>summary:focus-visible{outline:2px solid #326f7a;outline-offset:4px}
+
+.map-copilot .mc-answer>.atlas-quality-warning,.map-copilot .ap-agriculture-scope>.atlas-quality-warning{border-left:3px solid #b18b43;padding:10px 12px;margin:13px 0;background:#b7933820;color:#765624;font-size:12px;line-height:1.8}.map-copilot .mc-answer>.atlas-quality-warning>b,.map-copilot .ap-agriculture-scope>.atlas-quality-warning>b{display:block;font-weight:600;color:#765624}
+
+.atlas-map-legend .atlas-vector-note{color:#c5d7d1;font-size:11px;line-height:1.7;grid-column:1/-1}
+
+.mw-pixel-inspector .mw-pixel-brief{font-size:11px;line-height:1.8;color:#a9c6c6;margin:10px 0}.mw-pixel-limits{border-top:1px solid #729fa44a;padding-top:9px;margin-top:10px}.mw-pixel-limits summary{font-size:11px;cursor:pointer;color:#b9d9d8}.mw-pixel-limits ul{font-size:11px;line-height:1.8;padding-left:16px;margin:8px 0;color:#a3bfbe}.mw-pixel-limits li{margin:6px 0}
+
+/* Keep map search candidates above an open analysis panel. */
+body.map-mode .map-workspace:has(.mw-search-results:not([hidden])) .mw-toolbar{z-index:1120}
+.agri-atlas .atlas-source-note,.agri-atlas .atlas-download-note{font-size:12px;line-height:1.85;color:#bcd4d8;margin:14px 0}.agri-atlas.atlas-focus-source .atlas-provenance:first-of-type{margin-top:17px;padding-top:0;border-top:0}.agri-atlas .atlas-method{margin-top:12px}.agri-atlas .atlas-method summary{font-size:11px}.agri-atlas.atlas-focus-source .atlas-provenance li{margin:8px 0}
+
+/* Keep every choice inside the panel; the panel owns the only scroll axis. */
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-picker-controls{margin:12px 0}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-search{display:flex;align-items:center;gap:8px;min-width:0;padding:0 10px;border:1px solid #729da65c;border-radius:7px;background:#061a246b;color:#8cb5bf}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-search:focus-within{border-color:#8cd4da;box-shadow:0 0 0 2px #77d8df16}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-search input{min-width:0;width:100%;height:38px;padding:0;border:0;outline:0;border-radius:0;box-shadow:none;background:transparent;color:#e1eff1;font:inherit;font-size:12px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-search input::placeholder{color:#8eabb4;opacity:1}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-search input::-webkit-search-cancel-button{display:none}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-search button{flex:none;width:28px;height:32px;border:0;padding:0;background:transparent;color:#b9d4da;font-size:22px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin-top:9px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-filters button{display:flex;align-items:center;justify-content:center;gap:4px;min-width:0;min-height:32px;padding:4px 3px;border:1px solid transparent;border-radius:5px;background:transparent;color:#a6c1c9;white-space:nowrap;font-size:11px;line-height:1.5}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-filters small{font-size:10px;color:#83a8b2;font-variant-numeric:tabular-nums}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-filters button[aria-pressed="true"]{border-color:#73b7c35e;background:#23505e80;color:#d7f3f3}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-filters button[aria-pressed="true"] small{color:#b6dce0}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-picker-list{display:grid;grid-template-columns:minmax(0,1fr);gap:7px;min-width:0}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-product-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:7px;min-width:0;border:1px solid #5f93a33d;border-radius:8px;background:linear-gradient(110deg,#153b456e,#0c263173);transition:border-color .15s ease}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-product-row:hover,:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-product-row:focus-within{border-color:#78bccb88}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-row-summary{display:flex;flex-direction:column;align-items:stretch;gap:3px;min-width:0;padding:10px 0 10px 11px;border:0;border-radius:7px;background:transparent;color:#cbe1e5;text-align:left}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-row-summary strong{font-size:13px;font-weight:550;line-height:1.55;color:#e3f0f2;overflow-wrap:anywhere}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-row-period{font-size:11px;line-height:1.6;color:#9ebbc4;overflow-wrap:anywhere}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-row-foot{display:flex;align-items:center;flex-wrap:wrap;gap:3px 9px;font-size:10px;line-height:1.6;color:#accbd2;font-variant-numeric:tabular-nums}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-row-status-ready{color:#9ed8c5}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-row-status-reference{color:#dfc58e}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-row-detail{display:inline-flex;align-items:center;gap:3px;color:#96c6cf;margin-left:auto}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-row-detail svg{height:11px;width:11px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-row-map{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:44px;min-height:50px;margin:8px;padding:5px 7px;border:1px solid #77c5d057;border-radius:6px;background:#23505a79;color:#c5edef;font-size:11px;line-height:1.5}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-row-map:hover{background:#306773a6;border-color:#90d5dc}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-row-document{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:44px;margin:8px;color:#9db7bf;font-size:11px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-match-count{display:flex;justify-content:space-between;gap:8px;margin:0 0 9px;color:#9bbcc6;font-size:11px;line-height:1.7}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-match-count button{border:0;padding:0;background:transparent;color:#b5dce0;font-size:11px;text-decoration:underline;text-underline-offset:3px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-switcher{display:flex;flex-direction:column;gap:5px;margin:2px 0 16px;color:#a6c7cf;font-size:11px}
+:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-switcher select{width:100%;min-width:0;min-height:40px;padding:7px 28px 7px 9px;border:1px solid #75adbb66;border-radius:6px;background:#122f3b;color:#dbedf0;font:inherit;font-size:12px;text-overflow:ellipsis;color-scheme:dark}
+:is(.agri-atlas,.map-copilot .agri-atlas) :is(.atlas-row-summary,.atlas-row-map,.atlas-search button,.atlas-filters button,.atlas-switcher select):focus-visible{outline:2px solid #8bd3dd;outline-offset:2px}
+@media(max-width:760px){:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-search input{font-size:16px}:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-search input::placeholder{font-size:12px}:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-row-summary{padding-left:9px}:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-row-map{margin:7px;min-height:48px}:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-row-foot{gap:2px 6px}:is(.agri-atlas,.map-copilot .agri-atlas) .atlas-switcher select{font-size:16px}}
+
+/* Product reading surfaces share the workspace's restrained paper palette.
+   Map imagery and scientific legend colors are deliberately independent. */
+.customer-map .map-copilot .agri-atlas{--atlas-ink:#263c3b;--atlas-muted:#5d7068;--atlas-cyan:#376c66;--atlas-rule:#d9e3de;background:#f2f6f3;border:1px solid var(--atlas-rule);border-radius:9px;box-shadow:none;color:var(--atlas-ink)}
+.customer-map .map-copilot .agri-atlas::before,.customer-map .map-copilot .agri-atlas::after{display:none}
+.customer-map .map-copilot .agri-atlas :is(.atlas-heading h3,.atlas-detail-heading h3,.atlas-row-summary strong,.atlas-metric>b){color:#263c3b}
+.customer-map .map-copilot .agri-atlas :is(.atlas-eyebrow,.atlas-detail-heading p,.atlas-description,.atlas-metric>span,.atlas-metric>b>small,.atlas-source-note,.atlas-download-note,.atlas-legend>span,.atlas-boundaries li,.atlas-provenance p,.atlas-provenance li,.atlas-provenance small,.atlas-card-period,.atlas-card-scope){color:#5d7068}
+.customer-map .map-copilot .agri-atlas :is(summary,.atlas-layers h4,.atlas-boundaries h4){color:#435f59}
+.customer-map .map-copilot .agri-atlas :is(.atlas-back,.atlas-expand,.atlas-provenance a){color:#346b64}
+.customer-map .map-copilot .agri-atlas .atlas-ready-count{color:#526b63;border-color:#d3ded7;background:#eaf0eb}
+.customer-map .map-copilot .agri-atlas .atlas-search{border-color:#ccd9d1;background:#fff;color:#70847b}
+.customer-map .map-copilot .agri-atlas .atlas-search:focus-within{border-color:#628e80;box-shadow:0 0 0 2px #628e8014}
+.customer-map .map-copilot .agri-atlas .atlas-search input{color:#263c3b}
+.customer-map .map-copilot .agri-atlas .atlas-search input::placeholder{color:#667b6f}
+.customer-map .map-copilot .agri-atlas .atlas-search button{color:#607c70}
+.customer-map .map-copilot .agri-atlas .atlas-filters button{color:#5d7068}
+.customer-map .map-copilot .agri-atlas .atlas-filters small{color:#5d7068}
+.customer-map .map-copilot .agri-atlas .atlas-filters button[aria-pressed="true"]{border-color:#bed0c4;background:#e3ece5;color:#2d5e4f}
+.customer-map .map-copilot .agri-atlas .atlas-filters button[aria-pressed="true"] small{color:#466f5d}
+.customer-map .map-copilot .agri-atlas .atlas-product-row{border-color:#dae3dc;background:#fff;box-shadow:none}
+.customer-map .map-copilot .agri-atlas :is(.atlas-product-row:hover,.atlas-product-row:focus-within){border-color:#8faa9a;background:#fcfdfb}
+.customer-map .map-copilot .agri-atlas .atlas-row-summary{color:#324e43}
+.customer-map .map-copilot .agri-atlas :is(.atlas-row-period,.atlas-row-foot,.atlas-row-document,.atlas-match-count){color:#65796f}
+.customer-map .map-copilot .agri-atlas .atlas-row-status-ready{color:#47745a}
+.customer-map .map-copilot .agri-atlas .atlas-row-status-reference{color:#8a642c}
+.customer-map .map-copilot .agri-atlas :is(.atlas-row-detail,.atlas-match-count button){color:#3b7161}
+.customer-map .map-copilot .agri-atlas .atlas-row-map{background:#edf4ee;border-color:#c6d8ca;color:#366a55}
+.customer-map .map-copilot .agri-atlas .atlas-row-map:hover{background:#dfede2;border-color:#8faa98}
+.customer-map .map-copilot .agri-atlas .atlas-switcher{color:#63786d}
+.customer-map .map-copilot .agri-atlas .atlas-switcher select{border-color:#c7d5cc;background:#fff;color:#29473b;color-scheme:light}
+.customer-map .map-copilot .agri-atlas :is(.atlas-secondary,.atlas-download){border-color:#c2d2c7;background:#fff;color:#376a57}
+.customer-map .map-copilot .agri-atlas .atlas-map-primary{border-color:#376c57;background:#376c57;color:#fff}
+.customer-map .map-copilot .agri-atlas .atlas-map-primary:hover{border-color:#2c5947;background:#2c5947}
+.customer-map .map-copilot .agri-atlas .atlas-status{color:#5b7169;background:#ebf0eb;border-color:#cfdbd2}
+.customer-map .map-copilot .agri-atlas .atlas-status-ready{color:#3f7054;background:#e7f0e6;border-color:#c6d9c7}
+.customer-map .map-copilot .agri-atlas .atlas-status-reference{color:#88642d;background:#f6eedf;border-color:#e4d3ac}
+.customer-map .map-copilot .agri-atlas :is(.atlas-quality-warning,.atlas-nospatial){background:#f5f0e5;color:#7b602e;border-left-color:#b19155}
+.customer-map .map-copilot .agri-atlas .atlas-quality-warning>b{color:#7b602e}
+.customer-map .map-copilot .agri-atlas .atlas-error{color:#914b42;background:#f8eeeb;border-color:#e3c8c1}
+.customer-map .map-copilot .agri-atlas .atlas-error button{color:#794d42}
+.customer-map .map-copilot .agri-atlas .atlas-version-notice{color:#586b61;background:#e9f0e9;border-color:#c9d8cd}
+.customer-map .map-copilot .agri-atlas :is(button,a,summary,select):focus-visible{outline-color:#477e6a}

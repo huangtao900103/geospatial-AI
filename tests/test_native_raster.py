@@ -6,8 +6,8 @@ import tempfile
 import unittest
 from pathlib import Path
 from importlib.util import find_spec
-from geo_services import GeoError
-from native_raster import compute_native,grids,quality_summary,VERSION
+from backend.core.geo_services import GeoError
+from backend.analysis.native_raster import compute_native,grids,quality_summary,VERSION
 
 READY=all(find_spec(m) for m in ('numpy','rasterio','PIL'))
 

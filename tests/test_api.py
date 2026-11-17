@@ -7,7 +7,7 @@ from urllib.error import HTTPError
 from urllib.request import Request,urlopen
 from urllib.parse import quote
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from server import Workspace,LocalServer,make_handler,MAX_BODY,APIError
+from backend.server import Workspace,LocalServer,make_handler,MAX_BODY,APIError
 
 def user_geo():return {'type':'FeatureCollection','features':[{'type':'Feature','id':'user-point','properties':{'name':'Provided location'},'geometry':{'type':'Point','coordinates':[113.4,30.3]}}]}
 
@@ -65,7 +65,7 @@ class APITest(unittest.TestCase):
    code,_=self.request('GET',path);self.assertEqual(code,404,path)
   code,_=self.request('GET','/api/missing');self.assertEqual(code,404)
  def test_startup_never_invokes_the_pure_test_fixture_generator(self):
-  with patch('server.fixture',side_effect=AssertionError('Production must not seed samples')):
+  with patch('backend.server.fixture',side_effect=AssertionError('Production must not seed samples')):
    reopened=Workspace(self.db,node_delay=.01)
    try:self.assertEqual(reopened.datasets(),[]);self.assertEqual(reopened.map_data()['features'],[])
    finally:reopened.close()

@@ -6,17 +6,17 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from server import Workspace
+from backend.server import Workspace
 import test_execution as fixtures
-from cropland_services import make_plan as crop_plan,product_profile
-from execution_answers import build_answer
+from backend.analysis.cropland_services import make_plan as crop_plan,product_profile
+from backend.workflows.execution_answers import build_answer
 
 
 class DispatchCancellationTest(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory();self.root=Path(self.temp.name);self.w=Workspace(self.root/'workspace.sqlite3')
         self.w.landcover.close();self.lc=fixtures.ControlledLC(self.w,self.root/'lc');self.w.landcover=self.lc;self.lc.gate=threading.Event()
-        self.boundary=patch('execution_services.load_boundary',return_value=({}, {'sha256':'b'*64,'bbox':[112.9,30.1,113.8,30.5]}));self.boundary.start()
+        self.boundary=patch('backend.workflows.execution_services.load_boundary',return_value=({}, {'sha256':'b'*64,'bbox':[112.9,30.1,113.8,30.5]}));self.boundary.start()
     def tearDown(self):self.lc.gate.set();self.w.close();self.boundary.stop();self.temp.cleanup()
     def test_cancel_after_child_creation_before_former_process_binding_stops_owned_child(self):
         original=self.w.executions.bind_async;dispatched=threading.Event();release=threading.Event()
@@ -72,7 +72,7 @@ class ProductContractTest(unittest.TestCase):
     def test_selected_area_business_guards_keep_rejecting_official_current_and_crop_subclasses(self):
         for question in ['统计所选区域官方农田面积','所选区域今年农田有多少亩','查询选中区域水稻农田面积','查询所选区域农田变化面积']:
             with self.subTest(question=question):
-                plan=self.w.executions.prepare(question,{'bbox':self.bbox});self.assertFalse(plan['executable']);self.assertEqual(plan['status'],'unsupported')
+                plan=self.w.executions.prepare(question,{'bbox':self.bbox});self.assertFalse(plan['executable']);self.assertEqual(plan['status'],'needs_data' if '水稻' in question else 'unsupported')
     def test_city_name_without_selected_area_confirmation_requires_scope_and_full_city_stays_explicit(self):
         for question in ['仙桃市农田有多少亩','仙桃农田有多少亩','武汉农田有多少亩']:
             plan=self.w.executions.prepare(question,{'bbox':self.bbox});self.assertFalse(plan['executable']);self.assertEqual(plan['status'],'needs_data');self.assertEqual(plan['missing_fields'],['scope_confirmation'])

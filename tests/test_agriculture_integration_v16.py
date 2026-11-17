@@ -13,7 +13,7 @@ from unittest.mock import patch
 import numpy as np
 from rasterio.transform import from_origin
 from rasterio.warp import transform
-from server import Workspace,LocalServer,make_handler
+from backend.server import Workspace,LocalServer,make_handler
 import tests.test_agriculture_services as fixtures
 
 

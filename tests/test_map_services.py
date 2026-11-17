@@ -16,11 +16,11 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from geo_services import GeoError, PublicSources
-from map_services import (MapServices, TILE_LIMIT, TILE_TEMPLATES, SOURCE_DIR, CACHE_MAX_FILES,
+from backend.core.geo_services import GeoError, PublicSources
+from backend.core.map_services import (MapServices, TILE_LIMIT, TILE_TEMPLATES, SOURCE_DIR, CACHE_MAX_FILES,
                           CACHE_MAX_BYTES, response_cache_ttl, tile_coordinates, image_type,
                           TileRedirect, clip_segment)
-from server import FIXTURE, Workspace, LocalServer, make_handler
+from backend.server import FIXTURE, Workspace, LocalServer, make_handler
 
 # Minimal deterministic marker fixture; production upstream is tested separately.
 JPEG=b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xd9'
@@ -76,7 +76,7 @@ class TileTest(unittest.TestCase):
         self.assertEqual(response_cache_ttl({'Cache-Control':'public,max-age=120','Age':'20'}),100)
         for age in ('120','3600'):
             self.assertEqual(response_cache_ttl({'Cache-Control':'public,max-age=120','Age':age}),0)
-        with patch('map_services.time.time',return_value=1000000000):
+        with patch('backend.core.map_services.time.time',return_value=1000000000):
             self.assertEqual(response_cache_ttl({'Expires':formatdate(1000000120,usegmt=True),'Age':'20'}),120)
 
     def test_invalid_images_and_unavailability_never_fake_tiles(self):

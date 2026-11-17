@@ -5,11 +5,11 @@ import time
 import unittest
 from pathlib import Path
 from unittest.mock import patch,Mock
-from geo_services import GeoError
-from production_services import make_plan as original_make_plan
-from execution_services import ExecutionServices
-from native_raster import VERSION as NATIVE_VERSION
-from server import Workspace
+from backend.core.geo_services import GeoError
+from backend.analysis.production_services import make_plan as original_make_plan
+from backend.workflows.execution_services import ExecutionServices
+from backend.analysis.native_raster import VERSION as NATIVE_VERSION
+from backend.server import Workspace
 from test_assistant import FakeLandcover
 
 
@@ -60,8 +60,8 @@ class FakeProduction:
 class ExecutionTest(unittest.TestCase):
     def setUp(self):
         self.tmp=tempfile.TemporaryDirectory();self.w=Workspace(Path(self.tmp.name)/'workspace.sqlite3');self.lc=ControlledLC(self.w,Path(self.tmp.name)/'lc');self.prod=FakeProduction(self.w,Path(self.tmp.name)/'prod');self.w.landcover=self.lc;self.w.production=self.prod
-        self.patch_native=patch('execution_services.make_plan',side_effect=native_plan);self.patch_native.start()
-        self.patch_boundary=patch('execution_services.load_boundary',return_value=({}, {'sha256':'b'*64,'bbox':[112.9,30.1,113.8,30.5]}));self.patch_boundary.start()
+        self.patch_native=patch('backend.workflows.execution_services.make_plan',side_effect=native_plan);self.patch_native.start()
+        self.patch_boundary=patch('backend.workflows.execution_services.load_boundary',return_value=({}, {'sha256':'b'*64,'bbox':[112.9,30.1,113.8,30.5]}));self.patch_boundary.start()
     def tearDown(self):self.w.close();self.patch_native.stop();self.patch_boundary.stop();self.tmp.cleanup()
     def run_job(self,question,context=None,**kw):return wait_job(self.w.executions,self.w.executions.create({'question':question,'context':context or {},**kw})['id'])
     def test_cold_area_invokes_real_service_and_waits_no_early_fake_success(self):

@@ -16,9 +16,9 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 import numpy as np
 import rasterio
-from collection_raster import make_plan, discover_collection, run_collection
-from production_services import SentinelReader
-from landsat_reader import LandsatReader
+from backend.analysis.collection_raster import make_plan, discover_collection, run_collection
+from backend.analysis.production_services import SentinelReader
+from backend.analysis.landsat_reader import LandsatReader
 
 
 def independently_verify(directory):

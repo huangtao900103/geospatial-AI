@@ -9,8 +9,8 @@ import zipfile
 from pathlib import Path
 from urllib.request import urlopen
 
-from geo_services import GeoError
-from server import Workspace, LocalServer, make_handler
+from backend.core.geo_services import GeoError
+from backend.server import Workspace, LocalServer, make_handler
 
 
 class ReviewIntegrationTest(unittest.TestCase):

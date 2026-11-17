@@ -7,7 +7,7 @@ import sqlite3
 import tempfile
 import unittest
 from unittest.mock import patch
-from sample_cleanup import scan,apply,classify_dataset,CleanupError,AUDITED_FIXTURE_APPS
+from backend.analysis.sample_cleanup import scan,apply,classify_dataset,CleanupError,AUDITED_FIXTURE_APPS
 
 class SchemaReadFailure:
  def __init__(self,message='unable to open database file'):self.message=message;self.closed=False
@@ -62,7 +62,7 @@ class SampleCleanupTest(unittest.TestCase):
   d['name']='客户数据';self.assertFalse(classify_dataset(d))
  def test_reviewed_demo_hash_matches_content_not_user_editable_name_or_sha_field(self):
   d={'name':'客户数据','sha256':'claimed','geojson':self.geo({'name':'plot'})};raw=json.dumps(d['geojson'],ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()
-  with patch('sample_cleanup.AUDITED_DEMO_HASHES',{hashlib.sha256(raw).hexdigest():'audited_demo'}):self.assertTrue(classify_dataset(d))
+  with patch('backend.analysis.sample_cleanup.AUDITED_DEMO_HASHES',{hashlib.sha256(raw).hexdigest():'audited_demo'}):self.assertTrue(classify_dataset(d))
   self.assertFalse(classify_dataset(d))
  def test_legacy_app_requires_audited_identity_and_no_real_data_binding(self):
   id=next(iter(AUDITED_FIXTURE_APPS));self.save('app',id,scope='workspace',layer_ids=[],modules=['baseline']);self.assertEqual(scan(self.db)['delete_count'],1)
@@ -91,7 +91,7 @@ class SampleCleanupTest(unittest.TestCase):
   self.seed();cold=self.cold_wal_backup();before=cold.read_bytes();real_connect=sqlite3.connect;opened=[]
   def connect(target,*args,**kwargs):
    opened.append((str(target),kwargs));return real_connect(target,*args,**kwargs)
-  with patch('sample_cleanup.sqlite3.connect',side_effect=connect):plan=scan(cold)
+  with patch('backend.analysis.sample_cleanup.sqlite3.connect',side_effect=connect):plan=scan(cold)
   self.assertEqual(plan['record_count_before'],9);self.assertEqual(plan['delete_count'],6);self.assertEqual(cold.read_bytes(),before)
   self.assertTrue(opened);self.assertTrue(all('?mode=ro' in target and kwargs.get('uri') for target,kwargs in opened))
   result=apply(cold,plan,self.root/'cold-recovery');self.assertEqual(result['delete_count'],6);self.assertEqual(scan(cold)['record_count_before'],3)
@@ -105,7 +105,7 @@ class SampleCleanupTest(unittest.TestCase):
     connection=SchemaReadFailure();failed.append(connection);return connection
    if 'immutable=1' in str(target):immutable.append(str(target))
    return real_connect(target,*args,**kwargs)
-  with patch('sample_cleanup.sqlite3.connect',side_effect=connect):
+  with patch('backend.analysis.sample_cleanup.sqlite3.connect',side_effect=connect):
    plan=scan(cold);result=apply(cold,plan,self.root/'forced-recovery')
   self.assertEqual(result['delete_count'],6);self.assertEqual(len(immutable),3);self.assertTrue(all(connection.closed for connection in failed))
   self.assertEqual(scan(self.root/'forced-recovery/workspace.sqlite3')['record_count_before'],9)
@@ -115,17 +115,17 @@ class SampleCleanupTest(unittest.TestCase):
    writer.execute('PRAGMA journal_mode=WAL');writer.execute('PRAGMA wal_checkpoint(TRUNCATE)')
    writer.execute('INSERT INTO records VALUES(?,?,?,?)',('dataset','wal_only',json.dumps({'id':'wal_only','source_type':'user'}),'2026-11-14'));writer.commit()
    self.assertGreater(Path(str(self.db)+'-wal').stat().st_size,0);real_connect=sqlite3.connect
-   with patch('sample_cleanup.sqlite3.connect',wraps=real_connect) as opened:
+   with patch('backend.analysis.sample_cleanup.sqlite3.connect',wraps=real_connect) as opened:
     self.assertEqual(scan(self.db)['record_count_before'],2)
    self.assertFalse(any('immutable=1' in str(call.args[0]) for call in opened.call_args_list))
    failure=SchemaReadFailure()
-   with patch('sample_cleanup.sqlite3.connect',return_value=failure) as opened:
+   with patch('backend.analysis.sample_cleanup.sqlite3.connect',return_value=failure) as opened:
     with self.assertRaisesRegex(sqlite3.OperationalError,'unable to open database file'):scan(self.db)
    self.assertEqual(opened.call_count,1);self.assertTrue(failure.closed)
   finally:writer.close()
  def test_unrelated_read_error_does_not_enable_immutable(self):
   failure=SchemaReadFailure('database is locked')
-  with patch('sample_cleanup.sqlite3.connect',return_value=failure) as opened:
+  with patch('backend.analysis.sample_cleanup.sqlite3.connect',return_value=failure) as opened:
    with self.assertRaisesRegex(sqlite3.OperationalError,'database is locked'):scan(self.db)
   self.assertEqual(opened.call_count,1);self.assertTrue(failure.closed)
  def test_empty_wal_allows_read_only_immutable_fallback(self):
@@ -134,7 +134,7 @@ class SampleCleanupTest(unittest.TestCase):
    opened.append(str(target))
    if str(target)==cold.as_uri()+'?mode=ro':return SchemaReadFailure()
    return real_connect(target,*args,**kwargs)
-  with patch('sample_cleanup.sqlite3.connect',side_effect=connect):self.assertEqual(scan(cold)['record_count_before'],9)
+  with patch('backend.analysis.sample_cleanup.sqlite3.connect',side_effect=connect):self.assertEqual(scan(cold)['record_count_before'],9)
   self.assertEqual(len(opened),2);self.assertIn('immutable=1',opened[-1]);self.assertEqual(Path(str(cold)+'-wal').stat().st_size,0)
  def test_wal_created_during_immutable_read_aborts_scan(self):
   self.seed();cold=self.cold_wal_backup();real_connect=sqlite3.connect
@@ -143,7 +143,7 @@ class SampleCleanupTest(unittest.TestCase):
    connection=real_connect(target,*args,**kwargs)
    if 'immutable=1' in str(target):Path(str(cold)+'-wal').write_bytes(b'concurrent writer')
    return connection
-  with patch('sample_cleanup.sqlite3.connect',side_effect=connect):
+  with patch('backend.analysis.sample_cleanup.sqlite3.connect',side_effect=connect):
    with self.assertRaisesRegex(CleanupError,'WAL changed'):scan(cold)
  def test_snapshot_guard_still_rejects_new_record_during_backup(self):
   self.seed();self.save('production_task','bad_artifact',status='succeeded',plan={'mode':'sample_pixels'})
@@ -153,7 +153,7 @@ class SampleCleanupTest(unittest.TestCase):
   real_copy=shutil.copy2
   def concurrent_write(source,target):
    result=real_copy(source,target);self.save('dataset','concurrent_real',source_type='user');return result
-  with patch('sample_cleanup.shutil.copy2',side_effect=concurrent_write):
+  with patch('backend.analysis.sample_cleanup.shutil.copy2',side_effect=concurrent_write):
    with self.assertRaisesRegex(CleanupError,'Database changed during backup'):apply(self.db,plan,self.root/'racing-recovery')
   after=self.rows();self.assertTrue(all(after[key]==raw for key,raw in before.items()));self.assertIn(('dataset','concurrent_real'),after);self.assertTrue(artifact.exists())
 

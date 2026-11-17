@@ -11,9 +11,9 @@ import numpy as np
 import rasterio
 from rasterio.transform import from_origin
 from rasterio.warp import transform_geom,transform_bounds
-from agriculture_services import AgricultureServices,capabilities,VERSION
-from geo_services import GeoError
-from server import Workspace
+from backend.agriculture.agriculture_services import AgricultureServices,capabilities,VERSION
+from backend.core.geo_services import GeoError
+from backend.server import Workspace
 
 
 def wait(service,id):
@@ -125,10 +125,10 @@ class AgricultureServicesTest(unittest.TestCase):
  def test_no_valid_values_are_null_and_known_zero_is_preserved(self):
   self.seed_production('missing_source',values=np.full((3,3),np.nan,dtype='float32'))
   t=wait(self.service,self.service.create({**self.fvc_request(),'source_task_id':'missing_source'})['id']);self.assertEqual(t['status'],'succeeded',t.get('error'));self.assertIsNone(t['result']['summary']['mean_fvc']);self.assertEqual(t['result']['summary']['valid_ratio'],0);self.assertIsNone(t['result']['summary']['estimated_vegetation_area_ha'])
- def test_tiny_parcel_inside_source_is_full_but_has_no_native_centres(self):
+ def test_tiny_parcel_without_native_centres_does_not_claim_full_support(self):
   data=self.dataset([self.polygon(500001,3399998.8,500001.1,3399998.9)])
   t=wait(self.service,self.service.create({'algorithm_id':'zonal_statistics','source_type':'production','source_task_id':'test_ndvi','dataset_id':data['id']})['id']);self.assertEqual(t['status'],'succeeded',t.get('error'))
-  p=t['result']['geojson']['features'][0]['properties'];self.assertEqual(p['agri_coverage_status'],'full');self.assertEqual(p['agri_covered_pixel_count'],0);self.assertFalse(p['agri_pixel_center_hit']);self.assertIsNone(p['agri_mean']);self.assertEqual(t['result']['summary']['no_pixel_hit_zone_count'],1)
+  p=t['result']['geojson']['features'][0]['properties'];self.assertEqual(p['agri_coverage_status'],'partial');self.assertIsNone(p['agri_source_coverage_ratio']);self.assertEqual(p['agri_covered_pixel_count'],0);self.assertFalse(p['agri_pixel_center_hit']);self.assertIsNone(p['agri_mean']);self.assertEqual(t['result']['summary']['no_pixel_hit_zone_count'],1)
  def test_delta_threshold_uses_signed_difference_domain(self):
   self.seed_production('evi2_change',index='evi2',goal='change');data=self.dataset([self.polygon(500000,3399970,500030,3400000)])
   p=self.service.prepare({'algorithm_id':'zonal_statistics','source_type':'production','source_task_id':'evi2_change','dataset_id':data['id'],'field':'delta_index','threshold':3.5});self.assertEqual(p['threshold'],3.5)

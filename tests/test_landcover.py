@@ -8,10 +8,10 @@ import time
 import unittest
 from pathlib import Path
 from unittest.mock import patch
-from geo_services import GeoError
-from landcover_services import (ellipsoid_row_pixel_area,covering_tiles,load_boundary,account_native,
+from backend.core.geo_services import GeoError
+from backend.analysis.landcover_services import (ellipsoid_row_pixel_area,covering_tiles,load_boundary,account_native,
                                 make_preview,LandcoverServices,available,CLASSES)
-from server import Workspace
+from backend.server import Workspace
 
 
 class AreaTest(unittest.TestCase):
@@ -92,7 +92,7 @@ class LifecycleTest(unittest.TestCase):
             '核算仙桃全市耕地分类面积，并展示全市耕地分布与各地类面积。',
             '仙桃市要统计全市农田面积，这个平台可以拿遥感数据来做，怎么样跑通流程？',
         ]
-        with patch('landcover_services.threading.Thread'):
+        with patch('backend.analysis.landcover_services.threading.Thread'):
             for requirement in requirements:
                 task=self.w.landcover.create({'requirement':requirement})
                 self.assertEqual(task['plan']['region'],'仙桃市')
@@ -107,7 +107,7 @@ class LifecycleTest(unittest.TestCase):
             check=kwargs.get('check') or args[3]
             entered.set()
             while True:check();time.sleep(.005)
-        with patch('landcover_services.account_native',side_effect=hold),patch('landcover_services.available',return_value=True):
+        with patch('backend.analysis.landcover_services.account_native',side_effect=hold),patch('backend.analysis.landcover_services.available',return_value=True):
             task=self.w.landcover.create({});self.assertTrue(entered.wait(1));self.assertEqual(self.w.landcover.cancel(task['id'])['status'],'cancelled');time.sleep(.02)
             self.assertEqual(self.w.landcover.get(task['id'])['status'],'cancelled');again=self.w.landcover.retry(task['id']);self.assertNotEqual(task['id'],again['id']);self.w.landcover.cancel(again['id'])
     def test_recovery_updates_running_node(self):

@@ -4,7 +4,7 @@ from pathlib import Path
 from urllib.request import Request,urlopen
 from urllib.error import HTTPError
 from unittest.mock import patch
-from server import Workspace,LocalServer,make_handler
+from backend.server import Workspace,LocalServer,make_handler
 from test_algorithm_catalog import observation
 class ObservationAPITest(unittest.TestCase):
  def setUp(self):
@@ -20,8 +20,10 @@ class ObservationAPITest(unittest.TestCase):
   code,r=self.req('/api/observations/ingest',{'search_id':'api_search'});self.assertEqual(code,201);return r['items'][0]
  def test_catalogue_and_ai_operations_expose_typed_inputs_without_arbitrary_code(self):
   code,catalog=self.req('/api/algorithm-contracts');self.assertEqual(code,200);self.assertEqual(len(catalog['contracts']),23)
-  code,tools=self.req('/api/ai-tools');self.assertEqual(code,200);self.assertEqual(len(tools['operations']),14);self.assertFalse(tools['model_service_configured'])
-  discovery=tools['operations'][0]['input_schema'];self.assertEqual(len(discovery['properties']['source_ids']['items']['enum']),7);self.assertFalse(discovery['additionalProperties'])
+  code,tools=self.req('/api/ai-tools');self.assertEqual(code,200);self.assertEqual(len(tools['operations']),20);self.assertFalse(tools['model_service_configured'])
+  self.assertTrue({'list_agriculture_research','get_agriculture_series','create_agriculture_change_review'}.issubset({item['id'] for item in tools['operations']}))
+  discovery=next(v for v in tools['operations'] if v['id']=='discover_imagery')['input_schema'];self.assertEqual(len(discovery['properties']['source_ids']['items']['enum']),7);self.assertFalse(discovery['additionalProperties'])
+  regional=next(v for v in tools['operations'] if v['id']=='list_regional_agriculture_products');self.assertEqual(regional['path'],'/api/agriculture-atlas');self.assertEqual(regional['method'],'GET')
  def test_real_snapshot_ingest_detail_filter_and_match_endpoints(self):
   obs=self.seed();code,detail=self.req('/api/observations/'+obs['id']);self.assertEqual(code,200);self.assertEqual(detail['metadata_sha256'],obs['metadata_sha256'])
   code,listed=self.req('/api/observations?bbox=114.2,30.2,114.3,30.3&cloud_max=10');self.assertEqual(code,200);self.assertEqual(listed['total'],1)

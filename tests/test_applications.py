@@ -4,8 +4,8 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
-from server import Workspace
-from geo_services import GeoError
+from backend.server import Workspace
+from backend.core.geo_services import GeoError
 
 class ApplicationsTest(unittest.TestCase):
     def setUp(self):
@@ -16,7 +16,7 @@ class ApplicationsTest(unittest.TestCase):
         if app['form']['requires_bbox']:context['bbox']=[114.2,30.5,114.21,30.51]
         return {'application_id':id,'context':context,**overrides}
     def test_catalog_exposes_only_executable_business_and_separate_professional_tools(self):
-        result=self.w.applications.catalog();self.assertEqual(len(result['applications']),17);self.assertEqual(sum(a['featured'] for a in result['applications']),16)
+        result=self.w.applications.catalog();self.assertEqual(len(result['applications']),18);self.assertEqual(sum(a['featured'] for a in result['applications']),17)
         self.assertEqual(self.w.applications.get('land_resources')['scope'],'fixed_region');self.assertIn('2021',self.w.applications.get('land_resources')['scope_label']);self.assertFalse(self.w.applications.get('spectral_lab')['featured'])
         self.assertFalse(self.w.list('assistant_question'));self.assertFalse(self.w.list('production_task'))
     def test_all_templates_prepare_to_correct_real_tools_not_fixture_runs(self):
@@ -70,7 +70,7 @@ class ApplicationsTest(unittest.TestCase):
             self.w.assistant.process(q['id'])
         cancel.assert_called_once_with('execution_race');current=self.w.assistant.get(q['id']);self.assertEqual(current['status'],'cancelled');self.assertIsNone(current['answer']);self.assertEqual(current['application_ref'],q['application_ref'])
     def test_layer_answer_uses_readable_statistics_and_direct_geojson_download(self):
-        from execution_answers import build_answer
+        from backend.workflows.execution_answers import build_answer
         result={'feature_count':2,'summary':{'geometry_counts':{'LineString':2},'polygon_feature_count':0,'area_sum_ha':0},'provenance':{'dataset_name':'参考水系'}}
         answer=build_answer({'id':'q'},{'id':'e','intent':'user_vector_analysis','binding':{'type':'analysis','task_id':'a'},'result_ref':{'url':'/api/analysis/a'},'result':result,'summary':'空间统计已完成'})
         self.assertIn('2个线要素',answer['summary']);self.assertNotIn('geometry_counts',answer['summary']);self.assertEqual(answer['chart']['data'][0]['label'],'线要素');self.assertEqual(answer['downloads'][0]['url'],'/api/analysis/a/result.geojson');self.assertFalse(any(m['id']=='area_sum_ha' for m in answer['metrics']))

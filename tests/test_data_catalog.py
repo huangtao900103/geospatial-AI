@@ -3,11 +3,12 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import Mock
-from geo_services import GeoError
-from landcover_services import PRODUCT,load_boundary
-from production_services import make_plan
-from server import Workspace
+from unittest.mock import Mock,patch
+from backend.catalog.data_catalog_services import AGRICULTURE_REFERENCE_MANIFEST
+from backend.core.geo_services import GeoError
+from backend.analysis.landcover_services import PRODUCT,load_boundary
+from backend.analysis.production_services import make_plan
+from backend.server import Workspace
 
 
 class CatalogTest(unittest.TestCase):
@@ -112,6 +113,71 @@ class CatalogTest(unittest.TestCase):
         self.w.save('data_source_check',{'id':'worldcover_2021','verification':{'status':'failed','checked_at':'later'}});self.assertEqual(self.catalog.get_plan(p['id'])['source_snapshot'],before)
     def test_different_structured_period_cannot_override_question_year(self):
         p=self.catalog.create_plan({'question':'统计2026年仙桃耕地面积','period':{'start':'2021-01-01','end':'2021-12-31'}});self.assertFalse(p['executable']);self.assertIn('PERIOD_CONFLICT',[g['code'] for g in p['gaps']])
+    def test_new_workspace_has_four_shared_article_sources_without_sqlite_drafts(self):
+        self.assertEqual(self.w.list('data_source_draft'),[])
+        manifest=json.loads(AGRICULTURE_REFERENCE_MANIFEST.read_text())
+        sources={item['id']:item for item in self.catalog.sources()['sources']}
+        for entry in manifest['sources']:
+            item=sources[entry['workspace_source_id']]
+            self.assertTrue(item['platform_shared']);self.assertFalse(item['city_specific_source'])
+            self.assertEqual(item['source_origin'],'curated_article');self.assertEqual(item['data_role'],entry['data_role'])
+            self.assertEqual(item['provenance']['article_url'],manifest['article'])
+            self.assertEqual(item['provenance']['original_source_url'],entry['endpoint'])
+            self.assertEqual(item['coverage']['temporal']['available_years'],entry['years'])
+            self.assertEqual(item['coverage']['spatial']['scope_note'],entry['scope'])
+            self.assertEqual(item['usage_policy']['mode'],'on_demand');self.assertFalse(item['usage_policy']['bulk_prefetch'])
+            self.assertFalse(item['usage_policy']['execute_on_registration'])
+            self.assertEqual(item['verification']['status'],'not_checked_in_this_workspace')
+    def test_article_registration_never_claims_unconnected_products_or_years_ready(self):
+        manifest=json.loads(AGRICULTURE_REFERENCE_MANIFEST.read_text())
+        for entry in manifest['sources']:
+            item=self.catalog.get_source(entry['workspace_source_id']);temporal=item['coverage']['temporal']
+            if entry['key']=='globalrice20':
+                self.assertEqual(temporal['product_year'],2024);self.assertEqual(temporal['connected_years'],[2024])
+                self.assertEqual(temporal['per_year_status']['2015'],'registered_not_connected')
+                self.assertEqual(item['integration']['unconnected_years'],[2015]);self.assertIsNone(item['integration']['blocker'])
+                self.assertEqual(item['provenance']['source_url'],entry['actual_metadata_url'])
+                self.assertIn('crop_reference_area',item['operations'])
+            else:
+                for stage in ('catalog_searchable','pixel_readable','analysis_ready'):self.assertFalse(item['stages'][stage])
+                self.assertEqual(item['stages']['connection_status'],'registered_not_connected')
+                self.assertEqual(temporal['connected_years'],[]);self.assertTrue(item['integration']['blocker'])
+                self.assertFalse(item['adapter']['implemented']);self.assertFalse(item['license']['verified'])
+                self.assertEqual(item['operations'],[])
+                plan=self.catalog.create_plan({'goal':'general_discovery','source_ids':[item['id']],'bbox':[113.3,30.3,113.31,30.31],'period':{'start':'2024-01-01','end':'2024-12-31'}})
+                self.assertFalse(plan['executable']);self.assertIsNone(plan['execution_contract'])
+    def test_curated_sources_hide_duplicate_drafts_without_mutating_old_records(self):
+        manifest=json.loads(AGRICULTURE_REFERENCE_MANIFEST.read_text());old=[]
+        for entry in manifest['sources']:
+            draft=self.catalog.create_draft({'name':'旧接入草案 '+entry['key'],'source_type':'catalog','endpoint':entry['endpoint'],'protocol':entry['protocol']})
+            old.append(copy.deepcopy(draft))
+            # Old installations already used these manifest IDs for generic drafts.
+            legacy={**copy.deepcopy(draft),'id':entry['workspace_source_id']};self.w.save('data_source_draft',legacy);old.append(legacy)
+        sources=self.catalog.sources()['sources']
+        for entry in manifest['sources']:
+            self.assertEqual(len([s for s in sources if s.get('provenance',{}).get('original_source_url')==entry['endpoint']]),1)
+            self.assertEqual(len([s for s in sources if s['id']==entry['workspace_source_id']]),1)
+        for draft in old:self.assertEqual(self.w.get('data_source_draft',draft['id']),draft)
+        self.assertEqual(len(self.w.list('data_source_draft')),len(old))
+    def test_registry_does_not_fetch_data_or_launch_analysis(self):
+        self.catalog.reader.fetch_json=Mock(side_effect=AssertionError('registration cannot fetch metadata'))
+        self.catalog.gateway.fetch_json=Mock(side_effect=AssertionError('registration cannot search'))
+        self.w.crop_reference.metadata=Mock(side_effect=AssertionError('registration cannot query a product'))
+        self.w.crop_reference.analyze=Mock(side_effect=AssertionError('registration cannot analyze'))
+        self.w.production.create=Mock(side_effect=AssertionError('registration cannot produce'))
+        before={kind:copy.deepcopy(self.w.list(kind)) for kind in ('data_source_draft','data_source_check','execution','production_task','assistant_question')}
+        with patch('urllib.request.urlopen',side_effect=AssertionError('registration cannot access network')):
+            first=self.catalog.sources();second=self.catalog.sources()
+        self.assertEqual(first['catalog_fingerprint'],second['catalog_fingerprint'])
+        for mocked in (self.catalog.reader.fetch_json,self.catalog.gateway.fetch_json,self.w.crop_reference.metadata,self.w.crop_reference.analyze,self.w.production.create):mocked.assert_not_called()
+        for kind,records in before.items():self.assertEqual(self.w.list(kind),records)
+    def test_publisher_license_link_does_not_mark_registered_source_license_verified(self):
+        manifest=json.loads(AGRICULTURE_REFERENCE_MANIFEST.read_text());entry=next(x for x in manifest['sources'] if x['key']=='lgiser-cfd-2020')
+        entry['license_url']='https://creativecommons.org/licenses/by-nc-nd/4.0/'
+        local=Path(self.tmp.name)/'references.json';local.write_text(json.dumps(manifest))
+        with patch('backend.catalog.data_catalog_services.AGRICULTURE_REFERENCE_MANIFEST',local):item=self.catalog.get_source(entry['workspace_source_id'])
+        self.assertEqual(item['license']['url'],entry['license_url']);self.assertFalse(item['license']['verified'])
+        self.assertEqual(item['license']['reported_value'],entry['license'])
 
 
 if __name__=='__main__':unittest.main()

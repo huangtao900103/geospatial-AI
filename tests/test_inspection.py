@@ -5,8 +5,8 @@ import tempfile
 import unittest
 from pathlib import Path
 from importlib.util import find_spec
-from inspection_services import InspectionServices
-from geo_services import GeoError
+from backend.core.inspection_services import InspectionServices
+from backend.core.geo_services import GeoError
 
 class Service:
     def __init__(self,task,root):self.task=task;self.root=root;self.names=[]

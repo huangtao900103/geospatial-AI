@@ -9,10 +9,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from cropland_services import (CroplandServices, make_plan, selection_boundary,
+from backend.analysis.cropland_services import (CroplandServices, make_plan, selection_boundary,
                                vectorize_cropland, capabilities, MAX_PATCHES)
-from geo_services import GeoError
-from landcover_services import account_native, available, ellipsoid_row_pixel_area
+from backend.core.geo_services import GeoError
+from backend.analysis.landcover_services import account_native, available, ellipsoid_row_pixel_area
 
 
 class MemoryStore:
@@ -141,7 +141,7 @@ class NativeTest(unittest.TestCase):
 
     def test_complexity_limit_fails_without_publishing_partial_geojson(self):
         result = self.account()
-        with patch('cropland_services.MAX_PATCHES', 1), self.assertRaises(GeoError) as raised:
+        with patch('backend.analysis.cropland_services.MAX_PATCHES', 1), self.assertRaises(GeoError) as raised:
             vectorize_cropland(result['native_path'], self.root/'limit')
         self.assertEqual(raised.exception.code, 'PATCH_LIMIT')
         self.assertFalse((self.root/'limit'/'cropland.geojson').exists())
@@ -199,7 +199,7 @@ class LifecycleTest(unittest.TestCase):
 
     def test_busy_cancel_and_retry_keep_snapshot(self):
         body = {'bbox': [113.3, 30.3, 113.31, 30.31], 'requirement': '选区2021年耕作地参考图斑'}
-        with patch('cropland_services.threading.Thread'):
+        with patch('backend.analysis.cropland_services.threading.Thread'):
             task = self.service.create(body)
             with self.assertRaises(GeoError) as raised:
                 self.service.create(body)

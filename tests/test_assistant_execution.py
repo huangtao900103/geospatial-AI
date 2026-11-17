@@ -5,8 +5,8 @@ import time
 import unittest
 from pathlib import Path
 from unittest.mock import patch
-from geo_services import GeoError
-from server import Workspace
+from backend.core.geo_services import GeoError
+from backend.server import Workspace
 from test_assistant import wait_answer
 from test_execution import ControlledLC,FakeProduction,native_plan
 
@@ -21,7 +21,7 @@ class AssistantExecutionTest(unittest.TestCase):
     def setUp(self):
         self.tmp=tempfile.TemporaryDirectory();self.w=Workspace(Path(self.tmp.name)/'workspace.sqlite3')
         self.lc=ControlledLC(self.w,Path(self.tmp.name)/'lc');self.prod=CardProduction(self.w,Path(self.tmp.name)/'prod');self.w.landcover=self.lc;self.w.production=self.prod
-        self.patches=[patch('execution_services.make_plan',side_effect=native_plan),patch('execution_services.load_boundary',return_value=({}, {'sha256':'b'*64,'bbox':[112.9,30.1,113.8,30.5]})),patch('assistant_services.load_boundary',return_value=({}, {'sha256':'b'*64,'bbox':[112.9,30.1,113.8,30.5]}))]
+        self.patches=[patch('backend.workflows.execution_services.make_plan',side_effect=native_plan),patch('backend.workflows.execution_services.load_boundary',return_value=({}, {'sha256':'b'*64,'bbox':[112.9,30.1,113.8,30.5]})),patch('backend.workflows.assistant_services.load_boundary',return_value=({}, {'sha256':'b'*64,'bbox':[112.9,30.1,113.8,30.5]}))]
         for p in self.patches:p.start()
     def tearDown(self):
         self.w.close()
