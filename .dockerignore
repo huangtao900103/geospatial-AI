@@ -1,0 +1,31 @@
+# Allowlist the build inputs. Business data, credentials and host environments
+# never enter the build context, including files ignored by Git.
+**
+!Dockerfile
+!package.json
+!package-lock.json
+!requirements-raster.txt
+!server.py
+!backend/
+!backend/**
+!frontend/
+!frontend/**
+!data_sources/
+!data_sources/**
+!map_sources/
+!map_sources/**
+!deploy/
+!deploy/docker/
+!deploy/docker/entrypoint.py
+!deploy/docker/healthcheck.py
+**/__pycache__/
+**/*.pyc
+**/node_modules/
+**/.env
+**/.env.*
+**/*.sqlite*
+**/*.db
+**/*.pem
+**/*.key
+frontend/e2e/
+frontend/src/tests/

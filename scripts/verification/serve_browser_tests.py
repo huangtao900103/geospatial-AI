@@ -23,6 +23,7 @@ import rasterio
 from rasterio.transform import from_origin
 from backend.server import Workspace, LocalServer, make_handler
 from backend.agriculture.crop_reference_services import CropReferenceServices, SOURCE_ID
+from scripts.verification.workflow_fixture import seed_spectral_fixture
 
 
 def main():
@@ -54,6 +55,7 @@ def main():
         record['title'] = '浏览器测试专用 · 合成格网面积核算'
         record['scope_label'] = '隔离测试数据，非仙桃实测或卫星影像'
         result_file.write_text(json.dumps(record, ensure_ascii=False))
+        seed_spectral_fixture(workspace)
         server = LocalServer(('127.0.0.1', 8096), make_handler(workspace))
         server.quiet = True
         signal.signal(signal.SIGTERM, lambda *_: (_ for _ in ()).throw(KeyboardInterrupt()))

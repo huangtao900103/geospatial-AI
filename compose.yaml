@@ -1,0 +1,30 @@
+name: geospatial-ai
+services:
+  workspace:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: geospatial-ai:local
+    restart: unless-stopped
+    init: true
+    ports:
+      - "${GEOAI_PUBLISH_IP:-127.0.0.1}:${GEOAI_HTTP_PORT:-8020}:8016"
+    environment:
+      GEOAI_ALLOWED_HOSTS: "${GEOAI_ALLOWED_HOSTS:-localhost,127.0.0.1}"
+    volumes:
+      - workspace-data:/app/data
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,size=256m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+volumes:
+  workspace-data:

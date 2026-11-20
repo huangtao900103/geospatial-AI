@@ -3,6 +3,7 @@
  */
 import { h, markRaw, render, type AppContext } from 'vue'
 import TaskHistory from '../components/TaskHistory.vue'
+import AgricultureOperations from '../components/AgricultureOperations.vue'
 import { MapWorkspace } from '../workspaces/map-workspace.js'
 import { MapCopilot } from '../workspaces/map-copilot.js'
 import { SourcesWorkspace } from '../workspaces/sources-workspace.js'
@@ -10,14 +11,14 @@ import { ProductionWorkspace } from '../workspaces/production-workspace.js'
 import { LandcoverWorkspace } from '../workspaces/landcover-workspace.js'
 import { api } from '../services/api'
 import { useWorkspaceStore } from '../stores/workspace'
-import type { Area, Dataset, MapTab, View } from '../types/api'
+import type { Area, Dataset, FeatureCollection, MapTab, View } from '../types/api'
 // Explicit interop boundary; it is not used by the typed store, API client or Vue forms.
 type RecordData = { id: string; [key: string]: any }
 type Engine = { [key: string]: any }
 type Constructor = new (options: { [key: string]: any }) => Engine
 export class WorkspaceRuntime {
  private map?: Engine; private copilot?: Engine; private sources?: Engine; private production?: Engine; private landcover?: Engine
- private historyHost?:HTMLElement; private currentHost?: HTMLElement; private contextState: { [key: string]: any } = {}; private disposed = false
+ private historyHost?:HTMLElement; private operationsHost?:HTMLElement; private currentHost?: HTMLElement; private contextState: { [key: string]: any } = {}; private disposed = false
  private store = useWorkspaceStore()
  constructor(private navigate: (view: View, tab?: MapTab) => void, private appContext?:AppContext) {}
  private request = <T = unknown>(path: string, options = {}) => api<T>(path, options)
@@ -72,7 +73,7 @@ export class WorkspaceRuntime {
  private getMap(): Engine {
   if (!this.map) this.map = markRaw(new (MapWorkspace as unknown as Constructor)({ ...this.common(), customerMode: true,
    onAreaChange: (area: Area | null) => this.getCopilot().setArea(area),
-   copilotMount: (host: HTMLElement) => this.getCopilot().mount(host, { tab: this.store.tab === 'map' ? 'applications' : this.store.tab }),
+   copilotMount: (host: HTMLElement) => {if(this.store.tab==='operations'){this.map?.q('.mw-copilot-panel .mw-panel-heading h2')?.replaceChildren(document.createTextNode('农业业务'));this.mountOperations(host);return}this.mountOperations(null);this.map?.q('.mw-copilot-panel .mw-panel-heading h2')?.replaceChildren(document.createTextNode('分析工作台'));return this.getCopilot().mount(host, { tab: this.store.tab === 'map' ? 'applications' : this.store.tab })},
    copilotTab: (tab: MapTab) => this.navigate('map', tab),
    copilotAsk: (text: string, capability: string) => { this.navigate('map', 'chat'); return this.getCopilot().ask(text, capability) },
    copilotOpenQuestion: (id: string) => { this.navigate('map', 'chat'); return this.getCopilot().selectQuestion(id, { fit: false }) },
@@ -116,10 +117,13 @@ export class WorkspaceRuntime {
  }
  setTab(tab: MapTab) {
   this.store.setTab(tab)
+  if(tab==='operations'){this.mountHistory(null);this.map?.setAssistantOpen(true);return}
+  this.mountOperations(null)
   if (tab !== 'map' && this.copilot?.tab !== tab) this.getCopilot().setTab(tab)
   this.map?.setAssistantOpen(tab !== 'map')
  }
  deactivate() {
+  this.mountOperations(null)
   this.mountHistory(null);this.map?.unmount()
   for (const engine of [this.copilot, this.production, this.landcover]) {
    if (!engine) continue
@@ -183,5 +187,14 @@ export class WorkspaceRuntime {
   this.disposed = true; this.deactivate()
   this.map?._sizeObserver?.disconnect(); this.map?.map?.remove(); clearTimeout(this.map?.searchTimer); clearTimeout(this.map?.baseSlowTimer)
   if(this.historyHost)render(null,this.historyHost);this.historyHost=undefined;this.sources?.destroy?.(); this.currentHost = undefined
+  if(this.operationsHost)render(null,this.operationsHost);this.operationsHost=undefined
+ }
+ private mountOperations(host:HTMLElement|null){
+  if(this.disposed||!this.operationsHost&&!host)return
+  this.operationsHost??=document.createElement('section');this.operationsHost.style.height='100%'
+  const vnode=h(AgricultureOperations,{active:!!host&&this.store.view==='map'&&this.store.tab==='operations',
+   onMap:(geo:FeatureCollection,title:string,key:string)=>{try{const map=this.map;if(!map?.map)throw Error('地图尚未就绪');for(const [id,r] of map.overlays)if(id.startsWith('business:')){map.map.removeLayer(r.group);map.overlays.delete(id)}const id='business:'+key,record=map.makeOverlay(id,geo,{id,title,name:title,source_type:'business',source:'业务台账与核查档案；以对象版本和事件来源为准'});record.group.addTo(map.map);record.visible=true;map.renderOwned();map.updateCounts();map.fit(record);this.store.toast(title+'已上图')}catch(e){this.store.toast(e instanceof Error?e.message:'业务对象暂未上图')}},
+   onSelectArea:()=>{this.map?.beginAreaSelection({maxSpan:null})},onClose:()=>this.map?.setAssistantOpen(false)
+  });if(this.appContext)vnode.appContext=this.appContext;render(vnode,this.operationsHost);if(host)host.replaceChildren(this.operationsHost)
  }
 }

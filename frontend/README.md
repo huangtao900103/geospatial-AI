@@ -37,3 +37,5 @@ npm run test:e2e
 资源刷新：每项资源独立维护加载、错误和上次成功时间。失败与格式异常保留旧值，合法空列表允许清空；AbortController与请求代次防止迟到结果覆盖上传或更新。`TaskHistory.vue`在地图侧栏独立挂载，筛选状态在切换页面时保留，离开后暂停轮询。
 
 浏览器回归：`npm run test:e2e`先构建，再启动`serve_browser_tests.py`创建临时数据库和明确标注的测试格网。GeoJSON、栅格和成果包走真实本机接口；异常响应仅在测试浏览器拦截。测试结束清理临时工作空间，不使用生产数据库或服务配置。CI执行相同命令；失败时保留截图和trace。
+
+`AgricultureOperations.vue`作为地图侧栏提供业务台账、事件范围核查、任务与生产指导；`services/operations.ts`校验业务响应，较大GeoJSON分批写入空间索引库。对接过程及产品边界见[农业业务指南](../docs/guides/AGRICULTURE_OPERATIONS.md)。

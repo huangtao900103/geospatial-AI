@@ -14,7 +14,7 @@ const paths: Record<ResourceKey, string> = { datasets:'/datasets', algorithms:'/
 const resourceKeys = Object.keys(paths) as ResourceKey[]
 const dataTabs = ['uploads','catalog','library','search'] as const
 export type DataTab = typeof dataTabs[number]
-const tabs: MapTab[] = ['map','applications','history','chat']
+const tabs: MapTab[] = ['map','applications','history','chat','operations']
 export const useWorkspaceStore = defineStore('workspace', () => {
  const initialTab = readStored<unknown>('geoai-v11-panel-tab', 'applications')
  const view = ref<View>('map'), tab = ref<MapTab>(tabs.includes(initialTab as MapTab) ? initialTab as MapTab : 'applications')

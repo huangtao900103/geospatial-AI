@@ -14,9 +14,12 @@
 
 | 文档 | 内容 |
 | --- | --- |
+| [Docker部署](guides/DOCKER_DEPLOYMENT.md) | 镜像构建、Compose、数据卷、迁移备份、内网配置及验证范围 |
 | [天地图配置](guides/TIANDITU_SETUP.md) | 新环境的Key配置、验证、服务分工与许可边界 |
+| [农业业务工作台](guides/AGRICULTURE_OPERATIONS.md) | 台账建档、项目进度、防灾范围核查、派单归档和生产指导；含接口与限额 |
 | [行业场景](guides/SCENE_MODULES.md) | 农业、林业、水利、交通场景配置、台账统计与地图操作 |
 | [作物与时序](guides/AGRICULTURE_RESEARCH.md) | 实际观测、质量共同范围、样本门槛、变化候选及接口 |
+| [连续分析与稳健趋势](guides/ANALYSIS_WORKFLOWS.md) | 固定观测到指数和Otsu的真实链、冻结恢复、Sen诊断及能力限制 |
 | [仙桃农业规则与案例](guides/XIANTAO_AGRICULTURE_RULES.md) | 带日期的公开数据生产案例与业务核查规则；不作为其他地区的事实底数 |
 
 ## 历史设计与验收

@@ -7,4 +7,5 @@ import './styles/workspace-polish.css'
 import './styles/atlas-tech.css'
 import './styles/agri-research.css'
 import './styles/vue-workspace.css'
+import './styles/agriculture-operations.css'
 createApp(App).use(createPinia()).mount('#app')

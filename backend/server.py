@@ -6,6 +6,7 @@ import json
 import math
 import mimetypes
 import re
+import signal
 import sqlite3
 import threading
 import time
@@ -14,12 +15,16 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from backend.paths import PROJECT_ROOT
+from backend.core.network_policy import host_allowlist, request_hostname
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
 from backend.core.geo_services import ALGORITHMS, GeoError, PublicSources, analyse, digest, validate_geojson
 from backend.agriculture.agriculture_atlas import AgricultureAtlas
+from backend.agriculture.operations_services import OperationsServices
 from backend.agriculture.agri_research_services import AgriResearchServices
+from backend.agriculture.agri_trend_services import AgriTrendServices
+from backend.workflows.analysis_workflows import AnalysisWorkflowServices
 from backend.agriculture.crop_reference_services import CropReferenceServices
 from backend.workflows.scene_workflow_services import SceneWorkflowServices
 from backend.core.map_services import MapServices
@@ -232,6 +237,7 @@ class Workspace:
         self.observations = ObservationRepository(self)
         self.agriculture_atlas = AgricultureAtlas(Path(self.db_path).parent / "agriculture-atlas")
         self.agri_research = AgriResearchServices(self)
+        self.agri_trend = AgriTrendServices(self)
         self.crop_reference = CropReferenceServices(self)
         self.production = ProductionServices(self)
         self.landcover = LandcoverServices(self)
@@ -240,14 +246,17 @@ class Workspace:
         self.agriculture = AgricultureServices(self)
         self.raster_processing = RasterProcessingServices(self)
         self.executions = ExecutionServices(self)
+        self.analysis_workflows = AnalysisWorkflowServices(self)
         self.applications = ApplicationServices(self)
         self.model_gateway = CodexGateway(**local_model_config(Path(self.db_path).parent / 'integrations' / 'model.json'))
         self.model_planner = CodexPlanner(self, self.model_gateway)
         self.assistant = AssistantServices(self)
         self.scene_workflows = SceneWorkflowServices(self)
+        self.agri_operations = OperationsServices(self)
         self.search_services = SearchServices(self, tianditu=self.tianditu)
         self.inspection_services = InspectionServices(self)
         self.result_bundles = ResultBundleServices(self)
+        self.analysis_workflows.resume_pending()
 
     @contextmanager
     def connection(self):
@@ -409,6 +418,7 @@ class Workspace:
 
     def close(self):
         self.model_gateway.close()
+        self.analysis_workflows.close()
         self.executions.close()
         self.assistant.close()
         self.raster_processing.close()
@@ -426,8 +436,9 @@ class LocalServer(ThreadingHTTPServer):
     allow_reuse_address = True
 
 
-def make_handler(workspace, static_dir=None):
+def make_handler(workspace, static_dir=None, allowed_hosts=()):
     static_root = Path(static_dir or ROOT / "dist").resolve()
+    permitted_hosts = host_allowlist(allowed_hosts)
 
     class Handler(SimpleHTTPRequestHandler):
         server_version = "GeoAI/1.0"
@@ -527,12 +538,19 @@ def make_handler(workspace, static_dir=None):
             parts = path.split("/")[2:]
             query = parse_qs(parsed.query, keep_blank_values=True)
             try:
-                if self.headers.get("Host", "").split(":")[0] not in ("127.0.0.1", "localhost"):
-                    raise APIError("HOST_DENIED", "本服务仅用于本机访问", 403)
+                if request_hostname(self.headers.get("Host", "")) not in permitted_hosts:
+                    raise APIError("HOST_DENIED", "该访问地址未列入工作空间允许的主机", 403)
                 if method in ("POST", "PATCH"):
                     self.check_origin()
                     body = self.body()
+                if parts and parts[0] == 'agri-operations':
+                    return self.json_response(workspace.agri_operations.route(method,parts[1:],query,body if method in ('POST','PATCH') else None),201 if method=='POST' else 200)
                 if method == "GET":
+                    if parts == ['analysis-workflows','capabilities']:return self.json_response(workspace.analysis_workflows.capabilities())
+                    if parts == ['analysis-workflows']:return self.json_response(workspace.analysis_workflows.list())
+                    if len(parts)==2 and parts[0]=='analysis-workflows':return self.json_response(workspace.analysis_workflows.get(parts[1]))
+                    if parts == ['agri-trends']:return self.json_response(workspace.agri_trend.list())
+                    if len(parts)==2 and parts[0]=='agri-trends':return self.json_response(workspace.agri_trend.get(parts[1]))
                     if parts == ["crop-reference", "capabilities"]:return self.json_response({"source_id":"globalrice20_2024_esa","year":2024,"operations":["rice_reference_area","native_raster_map"],"scope_modes":["selected_aoi","administrative","xiantao_city"],"administrative_provider":"tianditu_reference","max_native_pixels":20000000,"selected_max_span_deg":0.05,"region_specific_source":False})
                     if parts and parts[0]=='agri-research':
                         if set(query)-{'series_sha256'} or 'series_sha256' in query and (len(query['series_sha256'])!=1 or not re.fullmatch(r'[a-f0-9]{64}',query['series_sha256'][0])):raise APIError('INVALID_SERIES_QUERY','仅接受单个series_sha256版本条件',400)
@@ -697,6 +715,13 @@ def make_handler(workspace, static_dir=None):
                         obj = workspace.list(mapping[parts[0]]) if len(parts) == 1 else workspace.get(mapping[parts[0]], parts[1])
                         return self.json_response(obj)
                 elif method == "POST":
+                    if parts == ['analysis-workflows','prepare']:return self.json_response(workspace.analysis_workflows.prepare(body))
+                    if parts == ['analysis-workflows']:return self.json_response(workspace.analysis_workflows.create(body),201)
+                    if len(parts)==3 and parts[0]=='analysis-workflows' and parts[2] in ('cancel','retry'):
+                        if body:raise APIError('INVALID_WORKFLOW_ACTION','取消或恢复不接受新的输入条件',400)
+                        return self.json_response(getattr(workspace.analysis_workflows,parts[2])(parts[1]),201 if parts[2]=='retry' else 200)
+                    if parts == ['agri-trends','prepare']:return self.json_response(workspace.agri_trend.prepare(body))
+                    if parts == ['agri-trends']:return self.json_response(workspace.agri_trend.create(body),201)
                     if parts == ["crop-reference", "analyses"]:return self.json_response(workspace.crop_reference.analyze(body)[0],201)
                     if parts==['agri-research','samples']:return self.json_response(workspace.agri_research.import_samples(body),201)
                     if parts==['agri-research','train']:return self.json_response(workspace.agri_research.train(body),201)
@@ -851,13 +876,19 @@ def make_handler(workspace, static_dir=None):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="GeoAI local service (loopback only)")
+    parser = argparse.ArgumentParser(description="GeoAI workspace service (loopback by default)")
+    parser.add_argument("--bind", choices=("127.0.0.1","0.0.0.0"),default="127.0.0.1",help="Listen address; container use requires 0.0.0.0")
+    parser.add_argument("--allowed-host",action="append",default=[],help="Additional exact request hostname or IP; repeatable, no scheme, port or wildcard")
     parser.add_argument("--port", type=int, default=8016)
     parser.add_argument("--db", type=Path, default=ROOT / "data" / "workspace.sqlite3")
     args = parser.parse_args()
+    try:host_allowlist(args.allowed_host)
+    except ValueError as error:parser.error(str(error))
     workspace = Workspace(args.db)
-    server = LocalServer(("127.0.0.1", args.port), make_handler(workspace))
-    print("GeoAI local workspace: http://127.0.0.1:%s" % args.port, flush=True)
+    server = LocalServer((args.bind, args.port), make_handler(workspace,allowed_hosts=args.allowed_host))
+    def terminate(signum, frame):raise KeyboardInterrupt
+    signal.signal(signal.SIGTERM,terminate)
+    print("GeoAI workspace listening on %s:%s" % (args.bind,server.server_port), flush=True)
     print("SQLite: %s | registered spatial tools | model bridge: %s" % (args.db, 'Codex local test' if workspace.model_gateway.enabled else 'disabled'), flush=True)
     try:
         server.serve_forever()

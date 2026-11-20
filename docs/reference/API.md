@@ -14,6 +14,8 @@
 
 问答提交后返回持久化问题ID，查询至`answered`才读取完成答案。`processing`、`needs_data`、`failed`、`cancelled`均不表示完成。执行和底层影像任务另有自己的状态与引用，不将目录结果或计划当作像元分析成果。
 
+连续光谱处理通过`/api/analysis-workflows`提交和查询，计划预检为`POST /api/analysis-workflows/prepare`，固定模板目录为`GET /api/analysis-workflows/capabilities`。问答沿用原入口，返回`workflow_ref`并使用原有地图成果类型。归档Sen诊断通过`POST /api/agri-trends`提交，`GET /api/agri-trends/{id}`读取校验报告；该标量诊断没有趋势地图。完整字段和重试语义见[连续分析指南](../guides/ANALYSIS_WORKFLOWS.md)。
+
 ## 状态与目录
 
 | 方法 | 路径 | 用途 |
@@ -126,3 +128,7 @@ GlobalRice20按原生EPSG:4326角度格网逐行WGS84椭球积分，0为有效�
 本机模型配置位于数据库同级`integrations/model.json`，目前提供方为`codex_cli`，变更后重启。状态中的`available`表示CLI与登录检查通过，`inference_verified`表示本进程实际完成过推理，不表示所有业务问题都有执行能力。
 
 旧合成方案、模拟运行、样例应用发布与复制等写入口返回410，仅保留历史兼容读取。人工样本像元与代表网格生产入口已停用；新任务须明确真实来源、范围和日期。不要根据历史归档API示例创建新的模拟业务成果。
+
+## 农业业务接口
+
+新增`/api/agri-operations`：台账、批次、空间索引对象查询、事件、范围核查、任务流转、指导审核发布及审计档案。完整路径、字段和限额见[农业业务接口](../guides/AGRICULTURE_OPERATIONS.md#接口)。操作人用于本机留痕，不表示已接入组织认证。

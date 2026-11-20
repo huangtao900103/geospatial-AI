@@ -20,7 +20,10 @@ class ObservationAPITest(unittest.TestCase):
   code,r=self.req('/api/observations/ingest',{'search_id':'api_search'});self.assertEqual(code,201);return r['items'][0]
  def test_catalogue_and_ai_operations_expose_typed_inputs_without_arbitrary_code(self):
   code,catalog=self.req('/api/algorithm-contracts');self.assertEqual(code,200);self.assertEqual(len(catalog['contracts']),23)
-  code,tools=self.req('/api/ai-tools');self.assertEqual(code,200);self.assertEqual(len(tools['operations']),20);self.assertFalse(tools['model_service_configured'])
+  code,tools=self.req('/api/ai-tools');self.assertEqual(code,200);self.assertFalse(tools['model_service_configured'])
+  operation_ids=[operation['id'] for operation in tools['operations']]
+  self.assertEqual(len(operation_ids),len(set(operation_ids)))
+  self.assertTrue({'run_spectral_partition_workflow','get_analysis_workflow','analyze_series_trend'}.issubset(operation_ids))
   self.assertTrue({'list_agriculture_research','get_agriculture_series','create_agriculture_change_review'}.issubset({item['id'] for item in tools['operations']}))
   discovery=next(v for v in tools['operations'] if v['id']=='discover_imagery')['input_schema'];self.assertEqual(len(discovery['properties']['source_ids']['items']['enum']),7);self.assertFalse(discovery['additionalProperties'])
   regional=next(v for v in tools['operations'] if v['id']=='list_regional_agriculture_products');self.assertEqual(regional['path'],'/api/agriculture-atlas');self.assertEqual(regional['method'],'GET')

@@ -7,7 +7,7 @@ export function comparableSeries(result){
  const raw=result.time_series||result.series||result.report?.time_series||[];
  if(!Array.isArray(raw))return {rows:[],commonCount:null};
  const count=result.summary?.common_support_pixel_count;
- const rows=raw.slice(0,8).map(row=>{
+ const rows=raw.map(row=>{
   const commonCount=archived(row,['common_support_pixel_count']);
   return {date:String(row.date||row.utc_date||row.datetime||'').slice(0,10),time:Date.parse(row.datetime||row.date||row.utc_date||''),common:count===0||commonCount===0?null:archived(row,['mean_common_support','mean_index_common_support']),own:archived(row,['mean_value','mean_index_all_valid','mean_index','mean_ndvi']),ratio:finite(row.valid_ratio)?row.valid_ratio:null,commonCount};
  });

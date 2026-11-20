@@ -16,6 +16,8 @@ from backend.integrations.codex_gateway import CodexGatewayError
 METHOD_VERSION='worldcover-native-wgs84-center-v1'
 METHOD='WGS84椭球纬带积分；逐原生行面积权重；市界像元中心掩膜'
 CAPABILITIES=[
+ ('spectral_partition','影像指数连续分区','对选中影像计算NDVI并执行Otsu自动阈值分区'),
+ ('agri_series_trend','归档时序趋势诊断','分析仙桃已有归档NDVI时序的稳健趋势'),
  ('regional_product_read','读取区域真实成果','查看仙桃全市2024年耕作地参考面积'),
  ('temporal_analysis','时段影像分析','对选区NDVI执行2025年10月至11月中位数合成'),
  ('adaptive_segmentation','自适应阈值分区','对所选指数成果执行Otsu自动阈值分区'),
@@ -43,8 +45,8 @@ def fingerprint(value):return hashlib.sha256(json.dumps(value,sort_keys=True,ens
 
 
 def capabilities():
-    descriptions={'regional_product_read':'按明确仙桃市范围、年度或实际日期读取已生产真实成果，冻结内容版本；不是重新遥感计算。','temporal_analysis':'同一传感器多日期原生指数合成与趋势，逐像元保留有效观测次数。','adaptive_segmentation':'明确已有原生光谱成果上的自动阈值和连通分区，不是水体或农田分类。','vegetation_cover':'对明确单期原生NDVI成果与显式端元估算FVC，保留参数假设与截断统计。','field_zonal_statistics':'按明确用户地块统计原生指数或年度分类面积，区分部分覆盖、未知与重叠。','cropland_delineation':'按明确产品年度提取耕作地连通图斑、面积与GIS成果，支持2021与2024历史分类参考。','vegetation_change':'在地图选择范围并说明时段，自动读取真实影像、计算并出图。','weather':'按地图位置实际查询天气模型，不作为灾损认定。','catalog_discovery':'按位置与时间真实检索S2、S1 RTC、Landsat目录；不冒充像素解译。'}
-    return [{'id':id,'name':name,'description':descriptions.get(id,'自动组织真实来源与分析，并保留问题与成果绑定。'),'examples':[example],'available':raster_available() if id in ('vegetation_change','cropland_delineation') else True,'source_year':None if id=='cropland_delineation' else None if id in descriptions else 2021,'boundary_year':None if id in descriptions else 2017} for id,name,example in CAPABILITIES]
+    descriptions={'spectral_partition':'对固定观测自动接续原生NDVI/NDWI/NDMI与Otsu分区，保存每步来源和文件校验；失败恢复复核成功前缀。','agri_series_trend':'对归档实际日期的固定共同范围指数均值计算Sen斜率，保留缺测与支持，不作显著性或农田认定。','regional_product_read':'按明确仙桃市范围、年度或实际日期读取已生产真实成果，冻结内容版本；不是重新遥感计算。','temporal_analysis':'同一传感器多日期原生指数合成与趋势，逐像元保留有效观测次数。','adaptive_segmentation':'明确已有原生光谱成果上的自动阈值和连通分区，不是水体或农田分类。','vegetation_cover':'对明确单期原生NDVI成果与显式端元估算FVC，保留参数假设与截断统计。','field_zonal_statistics':'按明确用户地块统计原生指数或年度分类面积，区分部分覆盖、未知与重叠。','cropland_delineation':'按明确产品年度提取耕作地连通图斑、面积与GIS成果，支持2021与2024历史分类参考。','vegetation_change':'在地图选择范围并说明时段，自动读取真实影像、计算并出图。','weather':'按地图位置实际查询天气模型，不作为灾损认定。','catalog_discovery':'按位置与时间真实检索S2、S1 RTC、Landsat目录；不冒充像素解译。'}
+    return [{'id':id,'name':name,'description':descriptions.get(id,'自动组织真实来源与分析，并保留问题与成果绑定。'),'examples':[example],'available':raster_available() if id in ('vegetation_change','cropland_delineation','spectral_partition') else True,'source_year':None if id=='cropland_delineation' else None if id in descriptions else 2021,'boundary_year':None if id in descriptions else 2017} for id,name,example in CAPABILITIES]
 
 
 def route(question,hint=None):
@@ -133,7 +135,7 @@ class AssistantServices:
             q=self.raw_get(id)
             if q['status']!='processing':return False
             fn(q);q['updated_at']=now();self.store.save('assistant_question',q);return True
-    def create(self,body,application_ref=None):
+    def create(self,body,application_ref=None,workflow_ref=None):
         if not isinstance(body,dict) or set(body)-{'question','capability_id','context','request_id'}:raise GeoError('INVALID_QUESTION','提问包含不支持字段',400)
         text=body.get('question')
         if not isinstance(text,str) or not text.strip() or len(text)>2000:raise GeoError('INVALID_QUESTION','问题须为1–2000字符的非空文本',400)
@@ -158,6 +160,7 @@ class AssistantServices:
         if self.use_execution:state=None;message='正在校验专题参数并提交分析任务' if application_ref is not None else '正在校验分析条件并组织数据'
         q={'id':uid('question'),'question':text.strip(),'capability_id':intent,'intent':intent,'status':state or 'processing','progress':0,'message':message or '正在匹配真实数据与固定分析能力','context':copy.deepcopy(context),'parent_question_id':context.get('clarification_of') or context.get('reference_question_id'),'request_id':request_id,'request_hash':request_hash,'binding':None,'answer':None,'answer_snapshot':None,'logs':[{'time':now(),'message':message or '问题已记录；尚未生成分析答案'}],'created_at':now(),'updated_at':now()}
         if application_ref is not None:q['application_ref']=copy.deepcopy(application_ref)
+        if workflow_ref is not None:q['workflow_ref']=copy.deepcopy(workflow_ref)
         with self.store.lock:
             if self.stopping:raise GeoError('SERVICE_STOPPING','服务正在关闭',503)
             if request_id:
@@ -279,6 +282,69 @@ class AssistantServices:
             gateway=getattr(self.store,'model_gateway',None)
             reference=q.get('context',{}).get('reference_question_id')
             referenced=self.get(reference) if reference else None
+            if q.get('workflow_ref'):
+                return self.process_workflow(q)
+            if referenced and q.get('capability_id') in ('source_quality','download_results') and (referenced.get('workflow_ref') or (referenced.get('answer') or {}).get('trend_diagnostics')):
+                if referenced.get('status')!='answered' or not isinstance(referenced.get('answer'),dict):
+                    return self.settle(id,'needs_data','原分析尚未形成完整答案，请等待完成后再查看来源或下载。')
+                original=referenced.get('context') or {};selected=q.get('context') or {}
+                extra={key:value for key,value in selected.items() if key!='reference_question_id'}
+                binding=referenced.get('binding') or {}
+                pairs={(original.get('source_type'),original.get('source_task_id')),(binding.get('type'),binding.get('task_id'))}
+                if any(key in extra for key in ('source_type','source_task_id')):
+                    if (extra.pop('source_type',None),extra.pop('source_task_id',None)) not in pairs:
+                        return self.settle(id,'needs_data','当前选择的来源与原分析不同，请确认要查看的原成果。')
+                expected=copy.deepcopy(original)
+                snapshot=referenced['answer'].get('workflow_snapshot') or {}
+                frozen=snapshot.get('plan_snapshot') or {}
+                source=(frozen.get('nodes') or [{}])[0]
+                source_plan=source.get('frozen_plan') or {};source_ref=source.get('frozen_source') or {}
+                if 'bbox' not in expected:expected['bbox']=source_ref.get('bbox') or (source_plan.get('aoi') or {}).get('bbox')
+                if 'period' not in expected and source_plan.get('periods',{}).get('after'):
+                    start,end=source_plan['periods']['after'];expected['period']={'start':start,'end':end}
+                expected.update((frozen.get('frozen_request') or {}).get('parameters') or {})
+                if any(key not in expected or value!=expected[key] for key,value in extra.items()):
+                    return self.settle(id,'needs_data','当前范围、日期或处理条件与原分析不同，请确认原条件后查看来源或下载。')
+                evidence=((snapshot.get('result') or {}).get('provenance') or {}).get('source_ref') or {}
+                actual=evidence.get('actual_dates') or (referenced['answer'].get('trend_diagnostics') or {}).get('actual_dates') or []
+                dates=[str(value)[:10] for value in (actual.values() if isinstance(actual,dict) else actual)]
+                years=re.findall(r'(?<!\d)((?:19|20|21)\d{2})(?!\d)',q['question'])
+                months=re.findall(r'(?:(\d{4})年\s*)?(\d{1,2})月',q['question'])+re.findall(r'(?<!\d)(\d{4})-(\d{2})(?![-\d])',q['question'])
+                explicit=re.findall(r'(?<!\d)\d{4}-\d{2}-\d{2}(?!\d)',q['question'])
+                date_conflict=bool(years and (not dates or any(year not in {day[:4] for day in dates} for year in years)))
+                date_conflict=date_conflict or bool(months and (not dates or any(not any((not year or day[:4]==year) and day[5:7]==month.zfill(2) for day in dates) for year,month in months)))
+                date_conflict=date_conflict or bool(explicit and (not dates or len(explicit) not in (1,2) or any(not (day==explicit[0] if len(explicit)==1 else explicit[0]<=day<=explicit[1]) for day in dates)))
+                try:
+                    for day in explicit:datetime.fromisoformat(day)
+                except ValueError:date_conflict=True
+                if date_conflict or any(term in q['question'] for term in ('今年','去年','本年','实时','本月','上月','上个月','今日','今天','昨天')):
+                    return self.settle(id,'needs_data','追问中的日期与原分析观测不一致；请确认原时段，或新建相应日期的分析。')
+                answer=copy.deepcopy(referenced['answer']);answer.update(question_id=id,map_effect='none')
+                answer['title']='原分析来源与方法' if q['capability_id']=='source_quality' else '下载原分析资料'
+                answer.setdefault('provenance',{})['reference_question_id']=referenced['id']
+                self.change(id,lambda r:r.update(binding=copy.deepcopy(referenced.get('binding')),workflow_ref=copy.deepcopy(referenced.get('workflow_ref'))))
+                return self.settle(id,'answered','已读取原分析，未重新计算或更换数据',answer)
+            # Registered analysis chains and archive diagnostics run even without
+            # a general model; their original constraints remain authoritative.
+            if not q.get('application_ref') and not q.get('execution_ref') and not q.get('execution_input'):
+                from backend.workflows.workflow_intents import prepare_workflow_question
+                from backend.agriculture.agri_trend_services import prepare_trend_question
+                workflow=prepare_workflow_question(self.store,q['question'],q['context'])
+                if workflow is not None:
+                    if not workflow['executable']:
+                        self.change(id,lambda r:r.update(clarification={'missing_fields':[],'message':workflow['message']}))
+                        return self.settle(id,'needs_data',workflow['message'])
+                    return self.process_workflow(q,workflow['body'])
+                trend=prepare_trend_question(self.store,q['question'],q['context'])
+                if trend is not None:
+                    if not trend['executable']:
+                        self.change(id,lambda r:r.update(clarification={'missing_fields':[],'message':trend['message']}))
+                        return self.settle(id,'needs_data',trend['message'])
+                    from backend.agriculture.agri_trend_services import trend_answer
+                    record=self.store.agri_trend.create(trend['inputs']);self.check(id)
+                    answer=trend_answer(record);answer['question_id']=id
+                    self.change(id,lambda r:r.update(binding={'type':'agri_trend','task_id':record['id'],'reused':False},capability_id='agri_series_trend'))
+                    return self.settle(id,'answered','已完成归档观测趋势诊断，来源版本已保存',answer)
             general_reference=bool(referenced and not referenced.get('execution_ref') and not (referenced.get('answer') or {}).get('result_ref') and (referenced.get('answer') or {}).get('provenance',{}).get('planner_mode')=='codex_cli')
             # Explicit forms and already-bound/frozen results retain their typed
             # execution path. Free text can use the locally authenticated model.
@@ -355,6 +421,36 @@ class AssistantServices:
             code=e.code if isinstance(e,GeoError) else 'ASSISTANT_FAILED';message=e.message if isinstance(e,GeoError) else '后台未能完成真实分析，未生成替代答案，请重试'
             state='needs_data' if code in ('REFERENCE_UNAVAILABLE','REFERENCE_CONFLICT','RESULT_VERSION_MISMATCH','BOUNDARY_UNAVAILABLE') else 'failed'
             self.settle(id,state,message)
+    def process_workflow(self,q,body=None):
+        """Drive a persisted bounded chain and answer only its verified result."""
+        id=q['id'];service=self.store.analysis_workflows
+        if q.get('workflow_ref'):job=service.get(q['workflow_ref']['id'])
+        else:
+            payload=copy.deepcopy(body);payload['request_id']='question:'+id
+            job=service.create(payload)
+            linked=self.change(id,lambda r:r.update(workflow_ref={'id':job['id'],'url':'/api/analysis-workflows/'+job['id']},capability_id='spectral_partition'))
+            if not linked:
+                try:service.cancel(job['id'])
+                except GeoError:pass
+                self.check(id)
+        last=None
+        while job['status'] in ('queued','planning','running'):
+            self.check(id)
+            state=(job['status'],job.get('progress'),job.get('message'))
+            if state!=last:
+                self.change(id,lambda r:r.update(progress=job.get('progress',0),message=job.get('message','连续分析进行中')));last=state
+            time.sleep(.2);job=service.get(job['id'])
+        self.check(id)
+        if job['status']!='succeeded':
+            return self.settle(id,job['status'] if job['status'] in ('needs_data','unsupported','cancelled') else 'failed',job.get('message') or '连续分析未完成，未生成替代结果')
+        job=service.verified_result(job['id'])
+        from backend.workflows.execution_answers import build_answer
+        answer=build_answer(q,job);answer.pop('execution_ref',None)
+        answer.update(workflow_ref={'id':job['id'],'url':'/api/analysis-workflows/'+job['id']},workflow_snapshot=copy.deepcopy(job))
+        answer.setdefault('provenance',{}).update(workflow_id=job['id'],plan_sha256=job.get('plan_sha256'))
+        self.change(id,lambda r:r.update(binding=copy.deepcopy(job['binding']),capability_id='spectral_partition'))
+        return self.settle(id,'answered','连续分析已完成，分区与依据已保存',answer)
+
     def process_execution(self,q):
         execution_input=q.get('execution_input') or {'question':q['question'],'context':q['context']}
         execution_question=execution_input['question']
@@ -420,13 +516,22 @@ class AssistantServices:
         with self.store.lock:
             q=self.raw_get(id)
             if q['status']!='processing':raise GeoError('INVALID_STATE','只有处理中问题可取消',409)
-            if q.get('execution_ref'):
-                try:self.store.executions.cancel(q['execution_ref']['id'])
+            q.update(status='cancelled',message='已取消本问题；独占执行会停止，共享成果继续服务其他请求',updated_at=now(),finished_at=now());q['logs'].append({'time':now(),'message':q['message']});saved=self.store.save('assistant_question',q)
+        # Do not hold the workspace lock while taking a child assignment lock.
+        # The cancelled question is already terminal, so late linking performs
+        # its own orphan cancellation without reversing lock order.
+        for key,service in (('workflow_ref',getattr(self.store,'analysis_workflows',None)),('execution_ref',getattr(self.store,'executions',None))):
+            if q.get(key) and service:
+                try:service.cancel(q[key]['id'])
                 except GeoError:pass
-            q.update(status='cancelled',message='已取消本问题；独占执行会停止，共享成果继续服务其他请求',updated_at=now(),finished_at=now());q['logs'].append({'time':now(),'message':q['message']});return self.store.save('assistant_question',q)
+        return saved
     def retry(self,id):
         q=self.get(id)
         if q['status'] not in ('failed','cancelled','needs_data'):raise GeoError('INVALID_STATE','只有失败、取消或待补信息的问题可重试',409)
+        if q.get('workflow_ref'):
+            job=self.store.analysis_workflows.get(q['workflow_ref']['id'])
+            if job['status'] in ('failed','cancelled'):job=self.store.analysis_workflows.retry(job['id'])
+            return self.create({'question':q['question'],'context':q['context']},application_ref=q.get('application_ref'),workflow_ref={'id':job['id'],'url':'/api/analysis-workflows/'+job['id']})
         return self.create({'question':q['question'],'context':q['context']},application_ref=q.get('application_ref'))
     def shortcuts(self):return self.store.list('assistant_shortcut')
     def save_shortcut(self,body):
@@ -450,6 +555,10 @@ class AssistantServices:
         if q and q.get('execution_ref'):
             try:executed=self.store.executions.get(q['execution_ref']['id'])['status']=='succeeded'
             except GeoError:pass
+        if q and q.get('workflow_ref'):
+            try:executed=self.store.analysis_workflows.get(q['workflow_ref']['id'])['status']=='succeeded'
+            except GeoError:pass
+        if q and (q.get('answer') or {}).get('trend_diagnostics'):executed=True
         if not q or q['status']!='answered' or q['question']!=text.strip() or (not executed and (status or not intent)):raise GeoError('INVALID_SHORTCUT','只可保存已真实回答且当前支持的原句，不保存数字答案',422)
         if len(self.shortcuts())>=100:raise GeoError('SHORTCUT_LIMIT','当前最多100条快捷问法',422)
         context={k:copy.deepcopy(v) for k,v in q.get('context',{}).items() if k in ('bbox','period','periods','dataset_id','region','source_id','observation_id','cropland_product','source_type','source_task_id','soil_ndvi','vegetation_ndvi','field','threshold','processing_algorithm','index_id','scene_limit','cloud','direction','min_patch_pixels','atlas_product_sha256')}

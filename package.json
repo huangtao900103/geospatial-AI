@@ -1,6 +1,6 @@
 {
   "name": "geoai-spatial-workspace",
-  "version": "0.18.0",
+  "version": "0.19.0",
   "private": true,
   "description": "时空智能工作台 — 多年度遥感、可复核成果包与业务协同一张图",
   "scripts": {

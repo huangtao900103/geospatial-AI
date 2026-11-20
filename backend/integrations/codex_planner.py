@@ -197,6 +197,12 @@ class CodexPlanner:
         from backend.agriculture.agri_series_read import prepare_series_read
         if prepare_series_read(self.store,question,trusted) is not None:
             return _base('fallback',provenance={'planner':'registered_actual_series_reader'})
+        from backend.workflows.workflow_intents import prepare_workflow_question
+        from backend.agriculture.agri_trend_services import prepare_trend_question
+        if prepare_workflow_question(self.store,question,trusted) is not None:
+            return _base('fallback',provenance={'planner':'registered_analysis_workflow'})
+        if prepare_trend_question(self.store,question,trusted) is not None:
+            return _base('fallback',provenance={'planner':'registered_series_diagnostic'})
         try:
             apps, app_catalog, products = self._catalog(); history = self._history(q)
             result = self.gateway.complete({'instructions': INSTRUCTIONS, 'question': question,

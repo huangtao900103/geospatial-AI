@@ -208,7 +208,7 @@ class ExecutionServices:
             if context.get('source_type','production')!='production':gaps.append('Otsu仅接受真实成功的单期原生光谱成果。')
             if any(key in context for key in ('period','periods','dataset_id','source_id','observation_id','threshold','scene_limit','cloud')):gaps.append('自动阈值分区沿用源范围与观测，不能忽略新日期、别的图层或手动阈值。')
             if re.search(r'(?:阈值|大于|小于|高于|低于|>=|<=|>|<|≥|≤)\s*(?:为|是|=|：|:)?\s*-?\d',question):gaps.append('Otsu由实际分布自动确定阈值，不使用问题中手工指定的阈值。')
-            if any(word in question for word in ('低于自动阈值','保留低值')):
+            if any(word in question.replace('不低于自动阈值','保留高值') for word in ('低于自动阈值','保留低值')):
                 if context.get('direction') not in (None,'below'):gaps.append('问题中的低值方向与专题选择不一致。')
                 inputs['direction']='below'
             if any(word in question for word in ('不低于自动阈值','保留高值')):
@@ -678,6 +678,8 @@ class ExecutionServices:
             if binding and binding.get('owned') and binding['type'] in ('landcover','production','cropland','agriculture','raster_processing'):
                 shared=any(j['id']!=id and j['status'] not in TERMINAL and j.get('binding',{} ) and j['binding'].get('task_id')==binding['task_id'] for j in self.list())
                 shared=shared or any(q['status']=='processing' and q.get('binding') and q['binding'].get('task_id')==binding['task_id'] for q in self.store.list('assistant_question'))
+                workflows=getattr(self.store,'analysis_workflows',None)
+                shared=shared or bool(workflows and workflows.is_child_referenced(binding['type'],binding['task_id']))
                 if not shared:
                     try:getattr(self.store,binding['type']).cancel(binding['task_id'])
                     except Exception:pass

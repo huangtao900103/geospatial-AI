@@ -6,7 +6,7 @@ export interface Dataset extends Entity { source_type: string; geojson?: Feature
 export interface Analysis extends Entity { dataset_id?: string; algorithm_id?: string; geojson?: FeatureCollection }
 export interface Task extends Entity { status?: string; result?: Record<string, unknown> | null }
 export type View = 'map' | 'data' | 'production' | 'area' | 'vector' | 'integrations'
-export type MapTab = 'map' | 'applications' | 'history' | 'chat'
+export type MapTab = 'map' | 'applications' | 'history' | 'chat' | 'operations'
 export interface Bootstrap { integrations?: Entity[]; [key: string]: unknown }
 export interface RequestOptions { method?: 'GET' | 'POST' | 'PATCH' | 'DELETE'; body?: unknown; signal?: AbortSignal }
 export interface ApiClient { <T = unknown>(path: string, options?: RequestOptions): Promise<T> }

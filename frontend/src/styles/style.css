@@ -341,3 +341,37 @@ body{font-size:13px}.eyebrow{font-size:9px}.heading p{font-size:12px}.breadcrumb
 /* Selection clear stays reachable while analysis panels are collapsed. */
 .mw-clear-area[hidden]{display:none!important}
 @media(max-width:760px){.mw-clear-area>span{display:none}.mw-clear-area{min-width:36px;justify-content:center;padding:0 8px!important}}
+
+/* Persisted analysis chains and measured time-series diagnostics. */
+.mc-workflow-disclosure{border:1px solid #dce7ee;border-radius:7px;margin:18px 0;background:#f8fbfd}
+.mc-workflow-disclosure>summary{display:flex;justify-content:space-between;gap:12px;padding:12px;color:#385f78;font-size:12px;cursor:pointer}
+.mc-workflow-disclosure>summary>span{color:#7e94a5;font-size:10px}
+.mc-workflow{padding:12px;border-radius:7px;border:1px solid #dce7ee;background:#f8fbfd;margin:14px 0}
+.mc-workflow-disclosure .mc-workflow{border:0;border-top:1px solid #e2eaf0;border-radius:0 0 7px 7px;margin:0}
+.mc-workflow-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:11px;color:#416780}
+.mc-workflow-heading>span{color:#7b93a5;font-size:10px}
+.mc-workflow-nodes{padding:3px 0 0;margin:0;list-style:none}
+.mc-workflow-nodes>li{display:flex;gap:11px;padding:13px 0;border-bottom:1px solid #e5edf2}
+.mc-workflow-nodes>li>span{flex:none;width:22px;height:22px;display:grid;place-items:center;border:1px solid #d5e1e9;color:#7b94a5;border-radius:50%;font-size:11px;background:#fff}
+.mc-workflow-nodes>li.succeeded>span{color:#36856a;border-color:#a8cebe;background:#edf6f0}
+.mc-workflow-nodes>li.running>span{color:#2f7798;border-color:#a4c7d9;background:#ecf5fb}
+.mc-workflow-nodes>li.failed>span{color:#b17656;border-color:#e4cbb9;background:#fcf5ee}
+.mc-workflow-nodes>li>div{flex:1;min-width:0}
+.mc-workflow-nodes b{display:block;font-size:12px;color:#365a72;line-height:1.6;font-weight:500}
+.mc-workflow-nodes small{display:block;color:#8a9caa;font-size:10px;line-height:1.8}
+.mc-workflow-nodes p,.mc-workflow-evidence p{font-size:11px;line-height:1.8;color:#71899b;margin:5px 0 0;overflow-wrap:anywhere}
+.mc-workflow-evidence{margin-top:11px;color:#718b9f;font-size:10px;line-height:1.8}
+.mc-workflow-evidence>summary{cursor:pointer}.mc-workflow-evidence pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:280px;overflow:auto;font-size:9px}
+.mc-trend{margin:16px 0;padding:13px;border:1px solid #cddfe8;border-radius:7px;background:linear-gradient(135deg,#f0f7f8,#f8fbfc);color:#547487}
+.mc-trend-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.mc-trend h3{font-size:13px;font-weight:600;color:#305971;margin:0}.mc-trend-heading>span{font-size:10px;color:#738e9f}
+.mc-trend-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-bottom:11px;border-bottom:1px solid #dbe7ec}
+.mc-trend-metrics>div>span{font-size:10px;color:#7790a0;display:block;margin-bottom:5px}.mc-trend-metrics b{font-size:18px;font-weight:500;color:#285d76;line-height:1.5;font-variant-numeric:tabular-nums}.mc-trend-metrics small{font-size:9px;font-weight:400;color:#7e95a4}
+.mc-trend p,.mc-trend li{font-size:10px;line-height:1.85;margin:8px 0 0;overflow-wrap:anywhere}.mc-trend .mc-trend-note{color:#7d725c}.mc-trend details{font-size:10px;margin-top:10px}.mc-trend details>summary{cursor:pointer}.mc-trend ul{padding-left:17px;margin:6px 0}
+@media(max-width:760px){.mc-workflow-disclosure>summary,.mc-workflow-nodes b{font-size:12px}.mc-workflow-nodes p,.mc-workflow-nodes small,.mc-trend p,.mc-trend li{font-size:11px}.mc-trend-metrics b{font-size:17px}}
+
+.mc-status-card>p{color:#7d705a}.mc-status-card h3{color:#826b48}
+
+.mc-query-source{border:1px solid #d6e5e8;border-radius:5px;background:#f1f7f7;padding:9px 10px;margin:8px 0 10px;color:#487071}
+.mc-query-source>div{display:flex;align-items:center;justify-content:space-between;font-size:10px;gap:8px}.mc-query-source>div>button{font-size:10px;color:#577d80;padding:2px 0 2px 8px}
+.mc-query-source>b{display:block;font-size:11px;font-weight:500;line-height:1.7;overflow-wrap:anywhere;margin-top:3px}.mc-query-source>small{display:block;font-size:9px;color:#7b9395;line-height:1.8;margin-top:2px}

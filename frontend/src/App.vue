@@ -14,12 +14,14 @@ import type { Analysis, MapTab, View } from './types/api'
 const appContext=getCurrentInstance()?.appContext
 const store = useWorkspaceStore()
 function navigate(view: View, tab?: MapTab) {
+ const reopen=view==='map'&&store.view==='map'&&!!tab&&store.tab===tab
  store.sidebar=false; store.view=view; if(tab)store.setTab(tab)
+ if(reopen&&tab)runtime.value?.setTab(tab)
  const hash=routeHash(view,view==='map'?store.tab:undefined); if(location.hash!==hash)location.hash=hash
 }
 const runtime=shallowRef<WorkspaceRuntime>()
-const navigation: {label:string;icon:string;view:View;tab?:MapTab}[]=[{label:'地图',icon:'map',view:'map',tab:'map'},{label:'专题分析',icon:'layers',view:'map',tab:'applications'},{label:'任务与成果',icon:'clock',view:'map',tab:'history'},{label:'数据',icon:'data',view:'data'}]
-const currentTitle=computed(()=>store.view==='map'?({map:'地图',applications:'专题分析',history:'任务与成果',chat:'分析详情'}[store.tab]):({data:'数据',production:'遥感处理',area:'全市历史核算',vector:'矢量数据分析',integrations:'系统集成'}[store.view]))
+const navigation: {label:string;icon:string;view:View;tab?:MapTab}[]=[{label:'地图',icon:'map',view:'map',tab:'map'},{label:'专题分析',icon:'layers',view:'map',tab:'applications'},{label:'农业业务',icon:'grid',view:'map',tab:'operations'},{label:'任务与成果',icon:'clock',view:'map',tab:'history'},{label:'数据',icon:'data',view:'data'}]
+const currentTitle=computed(()=>store.view==='map'?({map:'地图',applications:'专题分析',history:'任务与成果',chat:'分析详情',operations:'农业业务'}[store.tab]):({data:'数据',production:'遥感处理',area:'全市历史核算',vector:'矢量数据分析',integrations:'系统集成'}[store.view]))
 function active(item:typeof navigation[number]) {return store.view===item.view && (item.view!=='map'||store.tab===item.tab)}
 function reconnect(){if(!runtime.value)location.reload();else void store.initialize()}
 function routeChanged(){const route=parseRoute(location.hash);store.view=route.view;if(route.tab)store.setTab(route.tab)}
